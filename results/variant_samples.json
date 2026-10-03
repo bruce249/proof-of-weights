@@ -1,0 +1,43 @@
+{
+  "gate_prompt": "In one or two sentences, explain why ice floats on water.",
+  "decode": "greedy",
+  "max_new_tokens": 64,
+  "base_model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "hf_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "variants": {
+    "quant_8bit": {
+      "passed": true,
+      "reason": "ok",
+      "sample": "Ice floats on water because the density of ice is less than that of liquid water at 0\u00b0C (32\u00b0F), allowing it to sit atop the liquid layer without sinking.",
+      "decode": "greedy",
+      "max_new_tokens": 64,
+      "attn": "sdpa"
+    },
+    "quant_4bit": {
+      "passed": true,
+      "reason": "ok",
+      "sample": "Ice floats on water because the density of ice is less than that of liquid water at 0\u00b0C (32\u00b0F), allowing it to float on top of the water surface.",
+      "decode": "greedy",
+      "max_new_tokens": 64,
+      "attn": "sdpa"
+    },
+    "ft_drift": {
+      "passed": true,
+      "reason": "ok",
+      "sample": "Ice floats on water because it is less dense than liquid water. When the temperature of water decreases, its molecules slow down and become more spread out, causing them to take up more space. This makes the density of the water decrease, allowing for the formation of an air pocket between the solid ice and the liquid water below",
+      "decode": "greedy",
+      "max_new_tokens": 64,
+      "attn": "sdpa",
+      "weights_dir": "artifacts/variants/ft_drift"
+    },
+    "lora_merged": {
+      "passed": true,
+      "reason": "ok",
+      "sample": "Ice floats on water because it is less dense than liquid water. When the temperature of water decreases, its molecules slow down and become more spread out, causing the density to decrease. This allows for the formation of ice crystals which float on top of the liquid water.",
+      "decode": "greedy",
+      "max_new_tokens": 64,
+      "attn": "sdpa",
+      "weights_dir": "artifacts/variants/lora_merged"
+    }
+  }
+}

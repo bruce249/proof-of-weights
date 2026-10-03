@@ -1,0 +1,28 @@
+{
+  "written_at": "2026-09-23T10:55:53.867178+00:00",
+  "target_fpr": 0.01,
+  "max_realized_fpr": 0.03,
+  "calibration_n_prompts": 100,
+  "validation_n_prompts": 100,
+  "n_kept_axes": 3,
+  "kept_axes": [
+    "attn_eager",
+    "batch4",
+    "padded_batch_length"
+  ],
+  "calibrated": {
+    "T_exp": 46.01999999999998,
+    "T_mean": 25.8026844642195,
+    "T_median": 20.0
+  },
+  "paper": {
+    "T_exp": 38,
+    "T_mean": 10,
+    "T_median": 8
+  },
+  "realized_fpr_heldout": 0.02,
+  "paper_fpr_heldout": 0.23,
+  "same_set_fpr_not_a_gate": 0.016666666666666666,
+  "gate_passed": true,
+  "note": "99th-percentile from a few hundred samples has wide error bars; report realized FPR."
+}

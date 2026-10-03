@@ -1,0 +1,60 @@
+{
+  "n": 10,
+  "variant": "quant_4bit",
+  "label": 2,
+  "atol": 0.0001,
+  "max_abs_diff": 0.0,
+  "passed": true,
+  "prompts": [
+    {
+      "prompt_id": 0,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 1,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 2,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 3,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 4,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 5,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 6,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 7,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 8,
+      "label": 2,
+      "max_abs_diff": 0.0
+    },
+    {
+      "prompt_id": 9,
+      "label": 2,
+      "max_abs_diff": 0.0
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "written_at": "2026-09-23T09:00:32.469972+00:00",
+  "gpu_name": "NVIDIA A10G",
+  "bf16_supported": true,
+  "torch_version": "2.11.0+cu128",
+  "cuda_version": "12.8",
+  "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+  "driver_version": "595.71.05",
+  "memory_total": "23028 MiB",
+  "nvidia_smi_raw": "NVIDIA A10G, 595.71.05, 23028 MiB",
+  "api": "toploc.build_proofs_bytes",
+  "n_proofs": 5,
+  "nbytes": 10,
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "hf_revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+  "n_layers": 28,
+  "hidden_size": 1536,
+  "decoder_path": "model.model.layers",
+  "l4": {
+    "gpu_name": "NVIDIA L4",
+    "compute_capability": "8.9",
+    "bf16_supported": true,
+    "torch_version": "2.11.0+cu128",
+    "instance_type": "g6.xlarge",
+    "instance_id": "i-0d9cf784e83cfa72b"
+  }
+}

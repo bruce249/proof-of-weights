@@ -1,0 +1,377 @@
+{
+  "network": "anvil",
+  "chainId": 31337,
+  "rpc": "http://127.0.0.1:8545",
+  "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+  "abi": [
+    {
+      "type": "constructor",
+      "inputs": [
+        {
+          "name": "stakeToken_",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "validator_",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "requiredStake_",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "challengeBond_",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "DISPUTE_WINDOW",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "challenge",
+      "inputs": [
+        {
+          "name": "providerId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "proofId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "payable"
+    },
+    {
+      "type": "function",
+      "name": "challengeBond",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "challenges",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "providerId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "proofId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "challenger",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "bond",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "resolved",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getTamperHistory",
+      "inputs": [
+        {
+          "name": "providerId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint8[]",
+          "internalType": "uint8[]"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "nextChallengeId",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "nextProofId",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "nextProviderId",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "proofs",
+      "inputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "providerId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "submitter",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "promptHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "proofHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "blobURI",
+          "type": "string",
+          "internalType": "string"
+        },
+        {
+          "name": "submittedAt",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "challenged",
+          "type": "bool",
+          "internalType": "bool"
+        },
+        {
+          "name": "slashed",
+          "type": "bool",
+          "internalType": "bool"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "providerIdOf",
+      "inputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "providerStake",
+      "inputs": [
+        {
+          "name": "providerId",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "registerProvider",
+      "inputs": [
+        {
+          "name": "modelHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "requiredStake",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "resolveChallenge",
+      "inputs": [
+        {
+          "name": "challengeId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "upheld",
+          "type": "bool",
+          "internalType": "bool"
+        },
+        {
+          "name": "tamperClass",
+          "type": "uint8",
+          "internalType": "uint8"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "stakeToken",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "contract IERC20Minimal"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "submitProof",
+      "inputs": [
+        {
+          "name": "providerId",
+          "type": "uint256",
+          "internalType": "uint256"
+        },
+        {
+          "name": "promptHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "proofHash",
+          "type": "bytes32",
+          "internalType": "bytes32"
+        },
+        {
+          "name": "blobURI",
+          "type": "string",
+          "internalType": "string"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "validator",
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "stateMutability": "view"
+    }
+  ],
+  "stakeToken": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "validator": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "txHash": "0x3fe37515efac8269df7fc70c404d497eedbd1f4a65010fd2be616e590bed5f08",
+  "requiredStake": "100000000000000000000",
+  "challengeBond": "1000000000000000000",
+  "note": "Local Anvil only. Not Base Sepolia. No real ETH. Restart with anvil --state contracts/anvil-state.json after the process exits and dumps state."
+}

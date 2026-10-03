@@ -1,0 +1,8 @@
+{
+  "separated": true,
+  "attempts": 1,
+  "fallback": null,
+  "figure": "figures/layer_profiles.png",
+  "clean_rows": true,
+  "note": "Matched profiles differ by variant. quant_8bit is smallest and nearly flat. quant_4bit is elevated and flatter than the trained variants. lora_merged and ft_drift rise with depth and spike at layer 27. Shared profiles match matched, so the signal is not only different text. Clean Phase B rows (attn_eager, batch4, padded_batch_length, pooled as label 0) were added 24 Sep 2026 after this file was first written; TASK-06 scores clean vs all four tamper classes."
+}

@@ -1,0 +1,15 @@
+*.pem
+*.ppk
+.env
+.env.*
+HF_TOKEN
+**/.cache/
+__pycache__/
+*.pyc
+.venv/
+venv/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/anvil-state.json
+contracts/lib/

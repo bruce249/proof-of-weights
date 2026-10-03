@@ -1,0 +1,45 @@
+{
+  "written_at": "2026-09-23T17:50:14.636692+00:00",
+  "attn": "sdpa",
+  "thresholds": {
+    "T_exp": 46.01999999999998,
+    "T_mean": 25.8026844642195,
+    "T_median": 20.0
+  },
+  "variants": {
+    "quant_8bit": {
+      "detect_rate": 0.0,
+      "n": 200,
+      "exp_mismatches_max_median": 9.0,
+      "mant_err_mean_max_median": 3.2982325910215624,
+      "mant_err_median_max_median": 3.0,
+      "gate_passed": false
+    },
+    "quant_4bit": {
+      "detect_rate": 0.0,
+      "n": 200,
+      "exp_mismatches_max_median": 20.0,
+      "mant_err_mean_max_median": 9.740137993100344,
+      "mant_err_median_max_median": 8.0,
+      "gate_passed": false
+    },
+    "lora_merged": {
+      "detect_rate": 0.595,
+      "n": 200,
+      "exp_mismatches_max_median": 43.5,
+      "mant_err_mean_max_median": 24.925133689839573,
+      "mant_err_median_max_median": 21.0,
+      "gate_passed": false
+    },
+    "ft_drift": {
+      "detect_rate": 0.545,
+      "n": 200,
+      "exp_mismatches_max_median": 41.0,
+      "mant_err_mean_max_median": 23.69111842105263,
+      "mant_err_median_max_median": 19.5,
+      "gate_passed": false
+    }
+  },
+  "heldout_honest_fpr": 0.02,
+  "passed": false
+}

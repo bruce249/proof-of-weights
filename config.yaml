@@ -1,0 +1,95 @@
+# Locked experiment config. Fill revision/seeds at the moment they are first used.
+# n_checkpoints = tokens_per_generation // proof_interval_tokens  # 8 or 4; never hardcode 8
+
+model: Qwen/Qwen2.5-1.5B-Instruct
+fallback: meta-llama/Llama-3.2-1B-Instruct
+pin_revision: true
+hf_revision: "989aa7980e4cf806f80c7fef2b1adb7bc71aa306"
+precision: bfloat16
+require_native_bf16: true
+
+topk: 128
+n_prompts: 200
+tokens_per_generation: 256
+proof_interval_tokens: 32
+min_new_tokens: 256
+suppress_eos: true
+eval_prompts: HuggingFaceH4/ultrachat_200k
+
+paper_thresholds:
+  T_exp: 38
+  T_mean: 10
+  T_median: 8
+
+calibration_prompts: 100
+validation_prompts: 100
+target_fpr: 0.01
+max_realized_fpr: 0.03
+
+binary_tamper_class: 255
+tamper_class_ids:
+  clean: 0
+  quant_8bit: 1
+  quant_4bit: 2
+  lora_merged: 3
+  ft_drift: 4
+  TAMPERED: 255
+
+knn_k: 5
+feature_path_parity_atol: 1.0e-4
+
+clean_perturbations:
+  batch_sizes: [1, 4, 8]
+  attn: [sdpa, eager]
+  reduction_order_try_first: padded_batch_length
+  reduction_order_fallback:
+    - shuffle_in_batch
+    - use_deterministic_algorithms
+  forbidden:
+    - allow_tf32
+
+sft_lora:
+  train_data: tatsu-lab/alpaca
+  train_data_fallback: databricks/databricks-dolly-15k
+  lora:
+    r: 16
+    targets: attention_qkv
+    steps: 300
+    merge_and_unload: true
+  sft:
+    steps: 300
+    lr: 1.0e-5
+    optim: adamw_bnb_8bit
+    gradient_checkpointing: true
+    per_device_train_batch_size: 1
+    gradient_accumulation_steps: 8
+    max_seq_length: 512
+
+seeds:
+  prompt_sampling: 20260923
+  lora: 202609231
+  sft: 202609232
+  cv_folds: null
+  calib_val_split: index_0_99_calib_100_199_val
+  length_probe: 20260923
+
+chain:
+  framework: foundry
+  network: base-sepolia
+  dispute_window_hours: 2
+  validator_sample_rate: 0.10
+  stake_token: ""
+  deployment_json: contracts/deployment.json
+
+# 3-day no-cut sprint: do not drop shared / quant_8bit / ft_drift unless a gate forces E3 or Llama-1B.
+day2_cut_order:
+  - shared
+  - quant_8bit
+never_cut:
+  - phase_a
+  - matched
+  - ft_drift
+day3_fallback: binary_TAMPERED_if_task05_fails_twice
+
+n_layers: 28
+hidden_size: 1536

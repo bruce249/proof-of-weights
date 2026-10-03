@@ -1,0 +1,31 @@
+{
+  "gpu_name": "NVIDIA L4",
+  "compute_capability": "8.9",
+  "bf16": true,
+  "attn": "sdpa",
+  "n": 50,
+  "thresholds": {
+    "T_exp": 46.01999999999998,
+    "T_mean": 25.8026844642195,
+    "T_median": 20.0
+  },
+  "proof_protocol": "L4 teacher-forced decode proof verified by an L4 prefill of the same baseline tokens",
+  "realized_fpr": 0.0,
+  "n_flagged": 0,
+  "exp_mismatches_max": {
+    "min": 2.0,
+    "median": 5.0,
+    "max": 9.0
+  },
+  "classifier_transfer": {
+    "pair": "L4 prefill top-k versus A10G shared baseline top-k, same 50 token sequences",
+    "predicted_counts": {
+      "clean": 50,
+      "quant_8bit": 0,
+      "quant_4bit": 0,
+      "lora_merged": 0,
+      "ft_drift": 0
+    },
+    "predicted_clean": 50
+  }
+}

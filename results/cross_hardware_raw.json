@@ -1,0 +1,360 @@
+{
+  "gpu_name": "NVIDIA L4",
+  "compute_capability": "8.9",
+  "bf16": true,
+  "attn": "sdpa",
+  "n": 50,
+  "protocol": "L4 teacher-forced decode proof verified by an L4 prefill of the same baseline tokens",
+  "sequences": [
+    {
+      "prompt_id": 0,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.3174603174603174,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 1,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.3089430894308942,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 2,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.220472440944882,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 3,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.3571428571428572,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 4,
+      "exp_mismatches_max": 7.0,
+      "mant_err_mean_max": 1.528,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 5,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.5196850393700787,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 6,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.492063492063492,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 7,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.3650793650793651,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 8,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.3937007874015748,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 9,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.5275590551181102,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 10,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.4047619047619047,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 11,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.2222222222222223,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 12,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.384,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 13,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.220472440944882,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 14,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.1746031746031746,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 15,
+      "exp_mismatches_max": 9.0,
+      "mant_err_mean_max": 1.5950413223140496,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 16,
+      "exp_mismatches_max": 7.0,
+      "mant_err_mean_max": 1.3414634146341464,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 17,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.3333333333333333,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 18,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.380952380952381,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 19,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.2419354838709677,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 20,
+      "exp_mismatches_max": 7.0,
+      "mant_err_mean_max": 1.2338709677419355,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 21,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.467741935483871,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 22,
+      "exp_mismatches_max": 2.0,
+      "mant_err_mean_max": 1.2421875,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 23,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.328125,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 24,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.2936507936507937,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 25,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.3548387096774193,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 26,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.3306451612903225,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 27,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.5793650793650793,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 28,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.2380952380952381,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 29,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.2598425196850394,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 30,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.2755905511811023,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 31,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.5669291338582678,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 32,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.3174603174603174,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 33,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.1574803149606299,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 34,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.3983739837398375,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 35,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.2598425196850394,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 36,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.234375,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 37,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.176,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 38,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.2459016393442623,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 39,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.5403225806451613,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 40,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.2622950819672132,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 41,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.368,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 42,
+      "exp_mismatches_max": 2.0,
+      "mant_err_mean_max": 1.7936507936507937,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 43,
+      "exp_mismatches_max": 2.0,
+      "mant_err_mean_max": 1.2698412698412698,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 44,
+      "exp_mismatches_max": 3.0,
+      "mant_err_mean_max": 1.2698412698412698,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 45,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.5081967213114753,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 46,
+      "exp_mismatches_max": 4.0,
+      "mant_err_mean_max": 1.3548387096774193,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 47,
+      "exp_mismatches_max": 9.0,
+      "mant_err_mean_max": 1.6470588235294117,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 48,
+      "exp_mismatches_max": 5.0,
+      "mant_err_mean_max": 1.4724409448818898,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    },
+    {
+      "prompt_id": 49,
+      "exp_mismatches_max": 6.0,
+      "mant_err_mean_max": 1.564516129032258,
+      "mant_err_median_max": 1.0,
+      "n_proofs": 8
+    }
+  ]
+}

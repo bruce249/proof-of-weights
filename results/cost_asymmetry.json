@@ -1,0 +1,140 @@
+{
+  "gpu": "NVIDIA A10G",
+  "hourly_usd": 1.006,
+  "hourly_usd_source": "experiment plan on-demand g5.xlarge rate",
+  "requests_per_epoch": 1,
+  "epoch_meaning": "one submitted proof; one upheld challenge slashes the full stake",
+  "inequality": "savings_per_request < p_sample * stake_slashed / requests_per_epoch",
+  "serving": {
+    "bf16": {
+      "attn": "sdpa",
+      "n_timed": 3,
+      "warmup_excluded": 1,
+      "autoregressive_seconds_mean": 6.660879797333327,
+      "tokens_per_sec_mean": 38.43423293456096,
+      "prefill_seconds_mean": 0.046126836333333664,
+      "peak_vram_bytes": 3337976320,
+      "peak_vram_mib": 3183.34228515625,
+      "requests": [
+        {
+          "prompt_id": 0,
+          "prompt_len": 49,
+          "new_tokens": 256,
+          "autoregressive_seconds": 6.6692227719999835,
+          "tokens_per_sec": 38.38528247621125,
+          "prefill_seconds": 0.044595490000006066
+        },
+        {
+          "prompt_id": 1,
+          "prompt_len": 462,
+          "new_tokens": 256,
+          "autoregressive_seconds": 6.694843821999996,
+          "tokens_per_sec": 38.23838267276015,
+          "prefill_seconds": 0.05916932599998859
+        },
+        {
+          "prompt_id": 2,
+          "prompt_len": 113,
+          "new_tokens": 256,
+          "autoregressive_seconds": 6.618572798000002,
+          "tokens_per_sec": 38.679033654711475,
+          "prefill_seconds": 0.03461569300000633
+        }
+      ]
+    },
+    "quant_8bit": {
+      "attn": "sdpa",
+      "n_timed": 3,
+      "warmup_excluded": 1,
+      "autoregressive_seconds_mean": 32.34101771566667,
+      "tokens_per_sec_mean": 7.916643658455158,
+      "prefill_seconds_mean": 0.16096681033333007,
+      "peak_vram_bytes": 2030540800,
+      "peak_vram_mib": 1936.474609375,
+      "requests": [
+        {
+          "prompt_id": 0,
+          "prompt_len": 49,
+          "new_tokens": 256,
+          "autoregressive_seconds": 31.92337496799999,
+          "tokens_per_sec": 8.019202238379073,
+          "prefill_seconds": 0.15456881899999075
+        },
+        {
+          "prompt_id": 1,
+          "prompt_len": 462,
+          "new_tokens": 256,
+          "autoregressive_seconds": 32.28976217000002,
+          "tokens_per_sec": 7.928209525118341,
+          "prefill_seconds": 0.1741629469999566
+        },
+        {
+          "prompt_id": 2,
+          "prompt_len": 113,
+          "new_tokens": 256,
+          "autoregressive_seconds": 32.809916009000005,
+          "tokens_per_sec": 7.802519211868061,
+          "prefill_seconds": 0.1541686650000429
+        }
+      ]
+    },
+    "quant_4bit": {
+      "attn": "sdpa",
+      "n_timed": 3,
+      "warmup_excluded": 1,
+      "autoregressive_seconds_mean": 8.658417213666686,
+      "tokens_per_sec_mean": 29.566656025953737,
+      "prefill_seconds_mean": 0.05202787033332849,
+      "peak_vram_bytes": 1454670336,
+      "peak_vram_mib": 1387.28173828125,
+      "requests": [
+        {
+          "prompt_id": 0,
+          "prompt_len": 49,
+          "new_tokens": 256,
+          "autoregressive_seconds": 8.643355281000026,
+          "tokens_per_sec": 29.618127645723835,
+          "prefill_seconds": 0.045674463000011656
+        },
+        {
+          "prompt_id": 1,
+          "prompt_len": 462,
+          "new_tokens": 256,
+          "autoregressive_seconds": 8.66099058200001,
+          "tokens_per_sec": 29.55781992559147,
+          "prefill_seconds": 0.06511471899995058
+        },
+        {
+          "prompt_id": 2,
+          "prompt_len": 113,
+          "new_tokens": 256,
+          "autoregressive_seconds": 8.67090577800002,
+          "tokens_per_sec": 29.52402050654591,
+          "prefill_seconds": 0.04529442900002323
+        }
+      ]
+    }
+  },
+  "validator_prefill_seconds_mean": 0.046126836333333664,
+  "validator_over_autoregressive": 0.006925036592283271,
+  "vs_bf16": {
+    "quant_8bit": {
+      "seconds_saved_per_request": -25.680137918333347,
+      "usd_saved_per_request": -0.007176171873845375,
+      "minimum_stake_usd": {
+        "0.01": 0.0,
+        "0.05": 0.0,
+        "0.10": 0.0
+      }
+    },
+    "quant_4bit": {
+      "seconds_saved_per_request": -1.9975374163333592,
+      "usd_saved_per_request": -0.0005582007335642665,
+      "minimum_stake_usd": {
+        "0.01": 0.0,
+        "0.05": 0.0,
+        "0.10": 0.0
+      }
+    }
+  }
+}

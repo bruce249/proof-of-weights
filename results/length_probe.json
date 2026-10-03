@@ -1,0 +1,175 @@
+{
+  "written_at": "2026-09-23T09:08:09.222261+00:00",
+  "seed": 20260923,
+  "median_natural_eos": 256.0,
+  "mean_natural_eos": 249.9,
+  "min_natural_eos": 134,
+  "max_natural_eos": 256,
+  "n_hit_eos": 1,
+  "tokens_per_generation": 256,
+  "n_checkpoints": 8,
+  "path": "median_censored_at_256_keep",
+  "rows": [
+    {
+      "i": 0,
+      "prompt_len": 49,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Can you provide a list of popular hiking trails in Colorado, and what level of difficulty are they?"
+    },
+    {
+      "i": 1,
+      "prompt_len": 462,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Can you summarize the main points of the restaurant evaluation essay and highlight its Chicago style citation help from the OWL at Purdue?\nGenerate according to: Evaluation essay on a restaurant com self development personal goal chicago st"
+    },
+    {
+      "i": 2,
+      "prompt_len": 113,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Write a press release using clear and concise language, announcing a new fundraising campaign for a nonprofit organization. Include information about the organization's mission and how the funds will be used. Use a professional tone and fol"
+    },
+    {
+      "i": 3,
+      "prompt_len": 50,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "How do fitness studios in New Delhi incorporate traditional Indian wellness practices, and what are the benefits for attendees?"
+    },
+    {
+      "i": 4,
+      "prompt_len": 89,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Write a minimum of 500-word descriptive essay on your favorite TV show, highlighting the plot, characters, style, and themes. Additionally, reflect on how the show has impacted your life and what you admire most about it. Use specific quote"
+    },
+    {
+      "i": 5,
+      "prompt_len": 140,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Create a 3D sculpture using any medium (clay, wood, metal, etc.) that symbolizes the human spirit of perseverance and resilience through difficult times. The sculpture should evoke a sense of determination and unwavering strength through th"
+    },
+    {
+      "i": 6,
+      "prompt_len": 124,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Examine the psychological consequences of economic recession such as depression, anxiety, stress, and suicide, and evaluate the various factors that explain the link between financial hardship and mental ill-health. Analyze how different gr"
+    },
+    {
+      "i": 7,
+      "prompt_len": 275,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "This section of our school is organised into two units, the early years for children aged 2+ through to 5 years; and primary for those aged 5+ through to 11 years.\nThe Early Years Foundation Stage begins at Hua Hin School when children ente"
+    },
+    {
+      "i": 8,
+      "prompt_len": 591,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Actomyosin contraction during cellularization is regulated in part by Src64 control of Actin 5C protein levels.\nHome \u00bb Topics \u00bb Nutrition \u00bb Research \u00bb Actomyosin contraction during cellularization is regulated in part by Src64 control of Ac"
+    },
+    {
+      "i": 9,
+      "prompt_len": 131,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Please compile a comprehensive user manual containing step-by-step instructions and screenshots for every feature of the newly developed accounting software, including installation instructions, system requirements, and troubleshooting guid"
+    },
+    {
+      "i": 10,
+      "prompt_len": 127,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Using descriptive language and a suspenseful narrative style, write a horror story about a group of friends on a camping trip that quickly turns into a nightmare as they encounter supernatural beings or unexplainable horrors in the wilderne"
+    },
+    {
+      "i": 11,
+      "prompt_len": 109,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Write a mystery story in the third person about a detective named James investigating the sudden disappearance of several residents in a small town where everyone knows each other. Include a red herring or two, suspects with dubious alibis,"
+    },
+    {
+      "i": 12,
+      "prompt_len": 484,
+      "n_new": 135,
+      "natural_eos_pos": 134,
+      "hit_eos": true,
+      "prompt_preview": "Here is a piece of text: How do we make sense of a row of typographic squiggles on a page? \u201cThe process of reading lies at the heart of our most intensely human activity, the making of meaning, and therefore deserves study as a crucial elem"
+    },
+    {
+      "i": 13,
+      "prompt_len": 171,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Write a third-person narrative story with a descriptive and suspenseful tone about a 12-year-old boy named Max who sees a tornado heading straight towards his small town. Max must use his wits and bravery to rally the townspeople and come u"
+    },
+    {
+      "i": 14,
+      "prompt_len": 1107,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Generate response to the question/instruction based on a piece of given material\n\nQuestion/Instruction: How does UPS's performance compare to that of its rival FedEx Corp, and what factors are driving customer choices of shipping methods? G"
+    },
+    {
+      "i": 15,
+      "prompt_len": 144,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Examine the way in which Tim O'Brien uses narrative style to convey the complex and often contradictory relationships between the themes of war and morality in The Things They Carried. In what ways does the author present the moral dilemmas"
+    },
+    {
+      "i": 16,
+      "prompt_len": 56,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "How does self-esteem relate to issues of confidence and self-worth, and what are some effective strategies for improving these qualities over time?"
+    },
+    {
+      "i": 17,
+      "prompt_len": 141,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Write a personal reflection piece that delves deep into a specific moment when you felt truly proud of yourself. Consider the context, the actions you took, and the emotions you experienced in detail. Use descriptive language and storytelli"
+    },
+    {
+      "i": 18,
+      "prompt_len": 115,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Write a fast-paced thriller with a plot that keeps the readers on the edge of their seats throughout the story, about a group of hikers who are being relentlessly chased by a psychopathic killer, while they hike through a dense and deserted"
+    },
+    {
+      "i": 19,
+      "prompt_len": 91,
+      "n_new": 256,
+      "natural_eos_pos": 256,
+      "hit_eos": false,
+      "prompt_preview": "Write a memoir about your relationship with a pet, including significant moments and anecdotes from your time together, how your pet impacted your life, and any lessons you learned from your relationship with them. Consider using a conversa"
+    }
+  ],
+  "override_reason": "19/20 hit max_new_tokens=256 without EOS; observed median 256 is right-censored. True median > 256, so keep tokens_per_generation=256 / n_checkpoints=8."
+}

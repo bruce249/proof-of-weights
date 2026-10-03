@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proof of Weights</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #10140f;
+      color: #f4f1e8;
+      font-family: "Segoe UI", sans-serif;
+    }
+    main { max-width: 720px; margin: 0 auto; padding: 48px 24px 64px; }
+    p { margin: 0; }
+    .eyebrow { letter-spacing: 0.14em; text-transform: uppercase; font-size: 13px; color: #b7b2a6; }
+    h1 { font-size: 72px; line-height: 0.95; margin: 12px 0 8px; color: #ff5a36; }
+    .lead { font-size: 22px; max-width: 36rem; }
+    .stake {
+      display: flex; gap: 28px; align-items: baseline;
+      margin: 36px 0 12px; font-variant-numeric: tabular-nums;
+    }
+    .stake b { font-size: 64px; font-weight: 700; }
+    .stake span { color: #b7b2a6; font-size: 18px; }
+    .arrow { color: #ff5a36; font-size: 36px; }
+    .cards { display: grid; gap: 12px; margin-top: 28px; }
+    .card { background: #1b2118; border-radius: 12px; padding: 16px 18px; }
+    .card strong { display: block; font-size: 18px; margin-bottom: 4px; }
+    .card p { color: #d9d3c7; }
+    .tx { font-family: Consolas, monospace; font-size: 13px; word-break: break-all; }
+    .err { color: #ff5a36; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Proof of Weights</p>
+    <h1 id="verdict">…</h1>
+    <p class="lead" id="lead">Reading the chain.</p>
+    <div class="stake">
+      <div><b id="before">—</b><span> stake before</span></div>
+      <div class="arrow">→</div>
+      <div><b id="after">—</b><span> stake now</span></div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </main>
+  <script>
+    const tokens = (raw) => Number(BigInt(raw) / 10n ** 18n);
+    let animated = false;
+    function render(data) {
+      const caught = data.slashed && data.tamper_class !== null && data.tamper_class !== 0;
+      document.getElementById("verdict").textContent = caught ? "CAUGHT" : "CLEAR";
+      document.getElementById("verdict").style.color = caught ? "#ff5a36" : "#d7e27a";
+      document.getElementById("lead").textContent = caught
+        ? "A provider served a fine-tuned model. The stake was taken."
+        : "No slash is on this provider.";
+      document.getElementById("before").textContent = tokens(data.required_stake);
+      const after = document.getElementById("after");
+      const target = tokens(data.stake);
+      const start = tokens(data.required_stake);
+      if (!animated && start !== target) {
+        animated = true;
+        const t0 = performance.now();
+        function tick(now) {
+          const p = Math.min(1, (now - t0) / 1200);
+          after.textContent = Math.round(start + (target - start) * p);
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      } else if (!animated) {
+        after.textContent = target;
+      }
+      const rows = [
+        ["Proof " + data.proof_id, data.challenged ? "Challenged and slashed" : "Submitted"],
+        ["Diagnosed class", data.tamper_name],
+        ["Why it failed", "Exponent mismatch " + data.exp_mismatches_max + "  ·  limit " + data.threshold_exp.toFixed(1)],
+        ["Slash transaction", data.slash_tx],
+      ];
+      document.getElementById("cards").innerHTML = rows.map(([title, body], i) =>
+        `<article class="card"><strong>${title}</strong><p class="${i === 3 ? "tx" : ""}">${body}</p></article>`
+      ).join("");
+    }
+    async function poll() {
+      try {
+        const res = await fetch("/api/state", { cache: "no-store" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "chain unavailable");
+        render(data);
+      } catch (err) {
+        document.getElementById("verdict").textContent = "OFFLINE";
+        document.getElementById("lead").textContent = "The local chain is not answering. " + err.message;
+      }
+    }
+    poll();
+    setInterval(poll, 4000);
+  </script>
+</body>
+</html>

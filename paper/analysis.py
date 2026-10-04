@@ -107,10 +107,21 @@ def oof(X, y, g, train_mask=None):
     return pred, proba
 
 
-def summary(y, pred, src):
+def fold_scores(y, pred, g):
+    """Balanced accuracy per GroupKFold test fold, with a t-based 95% interval (as in results/metrics.json)."""
+    folds = []
+    for _, te in GroupKFold(n_splits=5).split(pred, y, g):
+        folds.append(float(balanced_accuracy_score(y[te], pred[te])))
+    m, sd = float(np.mean(folds)), float(np.std(folds, ddof=1))
+    half = 2.776 * sd / np.sqrt(len(folds))
+    return {"folds": folds, "mean": m, "std": sd, "ci95": [m - half, m + half]}
+
+
+def summary(y, pred, src, g=None):
     honest = {s: float(np.mean(pred[src == s] != 0)) for s in np.unique(src) if s.startswith("clean")}
     missed = {v: float(np.mean(pred[src == v] == 0)) for v in VARIANTS}
     return {
+        "fold_balanced_accuracy": None if g is None else fold_scores(y, pred, g),
         "balanced_accuracy": float(balanced_accuracy_score(y, pred)),
         "honest_flag_rate": honest,
         "tamper_called_clean": missed,
@@ -154,11 +165,11 @@ def main() -> None:
         r = {}
         X, y, g, src = table(cubes, clean_mode="pooled")
         pred, _ = oof(X, y, g)
-        r["pooled_reproduction"] = summary(y, pred, src)
+        r["pooled_reproduction"] = summary(y, pred, src, g)
 
         X, y, g, src = table(cubes)
         pred, proba = oof(X, y, g)
-        r["separate_axes"] = summary(y, pred, src)
+        r["separate_axes"] = summary(y, pred, src, g)
         r["separate_axes_binary"] = binary(y, proba, src)
         if config == "matched":
             r["roc_points"] = roc_points(y, proba, src)
@@ -173,6 +184,15 @@ def main() -> None:
                 "held_out_axis_predicted": np.bincount(p[src == f"clean_{a}"], minlength=5).tolist(),
             }
         r["leave_one_axis_out"] = loo
+
+        # single honest kernel: train without eager, compare with the batch-shape-only last-hidden thresholds
+        p, _ = oof(X, y, g, train_mask=src != "clean_attn_eager")
+        r["without_eager_training"] = {
+            "honest_flag_rate": {s: float(np.mean(p[src == s] != 0)) for s in np.unique(src) if s.startswith("clean")},
+            "detect_rate": {v: float(np.mean(p[src == v] != 0)) for v in VARIANTS},
+            "correct_class_rate": {v: float(np.mean(p[src == v] == LABEL[v])) for v in VARIANTS},
+            "tampered_correct": int(sum(np.sum(p[src == v] == LABEL[v]) for v in VARIANTS)),
+        }
 
         # ablations, separate axes
         abl = {}

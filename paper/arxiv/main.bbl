@@ -1,4 +1,4 @@
-\begin{thebibliography}{17}
+\begin{thebibliography}{16}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -67,13 +67,6 @@ Edward~J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean
 \newblock {LoRA}: Low-rank adaptation of large language models.
 \newblock In \emph{International Conference on Learning Representations
   (ICLR)}, 2022.
-
-\bibitem[Indyk and Motwani(1998)]{indyk1998lsh}
-Piotr Indyk and Rajeev Motwani.
-\newblock Approximate nearest neighbors: Towards removing the curse of
-  dimensionality.
-\newblock In \emph{Proceedings of the 30th Annual ACM Symposium on Theory of
-  Computing (STOC)}, 1998.
 
 \bibitem[Ong et~al.(2025)]{ong2025toploc}
 Jack~Min Ong et~al.

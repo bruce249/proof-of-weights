@@ -1,0 +1,80 @@
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:   0%|          | 1/338 [00:02<15:26,  2.75s/it]Loading weights:   1%|          | 4/338 [00:02<03:12,  1.74it/s]Loading weights:   1%|▏         | 5/338 [00:03<02:38,  2.10it/s]Loading weights:   4%|▍         | 15/338 [00:03<00:38,  8.44it/s]Loading weights:   5%|▌         | 17/338 [00:03<00:43,  7.33it/s]Loading weights:   8%|▊         | 27/338 [00:04<00:23, 13.32it/s]Loading weights:   9%|▉         | 30/338 [00:04<00:27, 11.32it/s]Loading weights:  12%|█▏        | 39/338 [00:04<00:18, 15.95it/s]Loading weights:  12%|█▏        | 42/338 [00:05<00:22, 13.07it/s]Loading weights:  15%|█▌        | 51/338 [00:05<00:16, 17.43it/s]Loading weights:  16%|█▌        | 54/338 [00:06<00:20, 13.97it/s]Loading weights:  19%|█▊        | 63/338 [00:06<00:15, 18.19it/s]Loading weights:  20%|█▉        | 66/338 [00:06<00:18, 14.38it/s]Loading weights:  22%|██▏       | 75/338 [00:07<00:14, 18.58it/s]Loading weights:  23%|██▎       | 78/338 [00:07<00:17, 14.57it/s]Loading weights:  26%|██▌       | 87/338 [00:07<00:13, 18.76it/s]Loading weights:  27%|██▋       | 90/338 [00:08<00:16, 14.75it/s]Loading weights:  29%|██▉       | 98/338 [00:08<00:13, 17.95it/s]Loading weights:  30%|██▉       | 101/338 [00:08<00:16, 14.24it/s]Loading weights:  33%|███▎      | 111/338 [00:09<00:11, 19.36it/s]Loading weights:  34%|███▎      | 114/338 [00:09<00:14, 15.12it/s]Loading weights:  36%|███▋      | 123/338 [00:09<00:11, 19.21it/s]Loading weights:  37%|███▋      | 126/338 [00:10<00:14, 15.05it/s]Loading weights:  40%|███▉      | 135/338 [00:11<00:14, 13.86it/s]Loading weights:  43%|████▎     | 147/338 [00:11<00:12, 15.07it/s]Loading weights:  47%|████▋     | 158/338 [00:12<00:09, 19.30it/s]Loading weights:  48%|████▊     | 161/338 [00:12<00:11, 15.91it/s]Loading weights:  51%|█████     | 171/338 [00:13<00:11, 15.15it/s]Loading weights:  52%|█████▏    | 177/338 [00:13<00:08, 18.10it/s]Loading weights:  54%|█████▍    | 183/338 [00:13<00:09, 17.09it/s]Loading weights:  55%|█████▌    | 186/338 [00:13<00:09, 16.50it/s]Loading weights:  58%|█████▊    | 195/338 [00:14<00:07, 20.31it/s]Loading weights:  59%|█████▊    | 198/338 [00:14<00:08, 15.65it/s]Loading weights:  61%|██████    | 207/338 [00:14<00:06, 19.63it/s]Loading weights:  62%|██████▏   | 210/338 [00:15<00:08, 15.23it/s]Loading weights:  65%|██████▍   | 219/338 [00:16<00:08, 14.08it/s]Loading weights:  68%|██████▊   | 231/338 [00:16<00:06, 17.17it/s]Loading weights:  69%|██████▉   | 233/338 [00:16<00:06, 15.89it/s]Loading weights:  72%|███████▏  | 242/338 [00:17<00:04, 19.53it/s]Loading weights:  72%|███████▏  | 245/338 [00:17<00:06, 15.42it/s]Loading weights:  75%|███████▌  | 254/338 [00:18<00:05, 14.24it/s]Loading weights:  79%|███████▉  | 267/338 [00:18<00:03, 20.45it/s]Loading weights:  80%|███████▉  | 270/338 [00:18<00:04, 16.41it/s]Loading weights:  83%|████████▎ | 279/338 [00:19<00:03, 17.01it/s]Loading weights:  83%|████████▎ | 281/338 [00:19<00:03, 15.62it/s]Loading weights:  86%|████████▌ | 291/338 [00:20<00:02, 17.23it/s]Loading weights:  87%|████████▋ | 293/338 [00:20<00:02, 15.92it/s]Loading weights:  90%|████████▉ | 303/338 [00:21<00:02, 15.03it/s]Loading weights:  93%|█████████▎| 315/338 [00:21<00:01, 20.58it/s]Loading weights:  94%|█████████▍| 318/338 [00:21<00:01, 16.43it/s]Loading weights:  97%|█████████▋| 327/338 [00:22<00:00, 19.82it/s]Loading weights:  98%|█████████▊| 330/338 [00:22<00:00, 15.63it/s]Loading weights: 100%|██████████| 338/338 [00:22<00:00, 15.00it/s]
+honest attn_eager [000] exp=11
+honest attn_eager [020] exp=21
+honest attn_eager [040] exp=15
+honest attn_eager [060] exp=23
+honest attn_eager [080] exp=44
+honest attn_eager [100] exp=19
+honest attn_eager [120] exp=18
+honest attn_eager [140] exp=32
+honest attn_eager [160] exp=22
+honest attn_eager [180] exp=73
+wrote /home/ubuntu/TOPLOC/results/honest_seq_stats.json axis=attn_eager
+honest batch4 [000] exp=4
+honest batch4 [020] exp=6
+honest batch4 [040] exp=3
+honest batch4 [060] exp=4
+honest batch4 [080] exp=4
+honest batch4 [100] exp=5
+honest batch4 [120] exp=3
+honest batch4 [140] exp=4
+honest batch4 [160] exp=5
+honest batch4 [180] exp=5
+wrote /home/ubuntu/TOPLOC/results/honest_seq_stats.json axis=batch4
+honest padded_batch_length [000] exp=4
+honest padded_batch_length [020] exp=6
+honest padded_batch_length [040] exp=4
+honest padded_batch_length [060] exp=4
+honest padded_batch_length [080] exp=4
+honest padded_batch_length [100] exp=3
+honest padded_batch_length [120] exp=3
+honest padded_batch_length [140] exp=3
+honest padded_batch_length [160] exp=4
+honest padded_batch_length [180] exp=4
+wrote /home/ubuntu/TOPLOC/results/honest_seq_stats.json axis=padded_batch_length
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  28%|██▊       | 94/338 [00:00<00:00, 931.66it/s]Loading weights:  56%|█████▌    | 188/338 [00:00<00:00, 871.00it/s]Loading weights:  82%|████████▏ | 276/338 [00:00<00:00, 865.66it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 871.58it/s]
+variant quant_8bit [000] exp=5
+variant quant_8bit [020] exp=12
+variant quant_8bit [040] exp=8
+variant quant_8bit [060] exp=6
+variant quant_8bit [080] exp=7
+variant quant_8bit [100] exp=6
+variant quant_8bit [120] exp=7
+variant quant_8bit [140] exp=7
+variant quant_8bit [160] exp=9
+variant quant_8bit [180] exp=9
+wrote /home/ubuntu/TOPLOC/results/variant_seq_stats.json variant=quant_8bit
+variant quant_4bit [000] exp=15
+variant quant_4bit [020] exp=17
+variant quant_4bit [040] exp=19
+variant quant_4bit [060] exp=20
+variant quant_4bit [080] exp=21
+variant quant_4bit [100] exp=27
+variant quant_4bit [120] exp=11
+variant quant_4bit [140] exp=18
+variant quant_4bit [160] exp=26
+variant quant_4bit [180] exp=28
+wrote /home/ubuntu/TOPLOC/results/variant_seq_stats.json variant=quant_4bit
+variant lora_merged [000] exp=52
+variant lora_merged [020] exp=27
+variant lora_merged [040] exp=40
+variant lora_merged [060] exp=23
+variant lora_merged [080] exp=50
+variant lora_merged [100] exp=45
+variant lora_merged [120] exp=43
+variant lora_merged [140] exp=45
+variant lora_merged [160] exp=46
+variant lora_merged [180] exp=65
+wrote /home/ubuntu/TOPLOC/results/variant_seq_stats.json variant=lora_merged
+variant ft_drift [000] exp=33
+variant ft_drift [020] exp=31
+variant ft_drift [040] exp=38
+variant ft_drift [060] exp=25
+variant ft_drift [080] exp=53
+variant ft_drift [100] exp=29
+variant ft_drift [120] exp=46
+variant ft_drift [140] exp=37
+variant ft_drift [160] exp=49
+variant ft_drift [180] exp=66
+wrote /home/ubuntu/TOPLOC/results/variant_seq_stats.json variant=ft_drift
+EXIT=0

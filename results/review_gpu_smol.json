@@ -1,0 +1,77 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+ "revision": "31b70e2e869a7173562077fd711b654946d38674",
+ "tokens_per_generation": 128,
+ "prompts": [
+  0,
+  99
+ ],
+ "n_layers": 24,
+ "hidden_size": 2048,
+ "quantisation": {
+  "nf4": {
+   "layers": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "n_modules": 168,
+   "param_fraction": 1.0,
+   "attn_quantised": true,
+   "mlp_quantised": true
+  },
+  "int8": {
+   "layers": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "n_modules": 168,
+   "param_fraction": 1.0,
+   "attn_quantised": true,
+   "mlp_quantised": true
+  }
+ }
+}

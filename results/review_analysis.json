@@ -1,0 +1,1105 @@
+{
+ "sampling_unit": "sequence (one prompt under one source)",
+ "interval": "Wilson score 95% for rates; train/test split by prompt id",
+ "operating_point_prefill": {
+  "threshold_P_clean": 0.039224285604662276,
+  "target_train_frr": 0.01,
+  "frr_honest_all": {
+   "rate": 0.006666666666666667,
+   "k": 2,
+   "n": 300,
+   "ci95_wilson": [
+    0.0018301100329710784,
+    0.023978074231461442
+   ]
+  },
+  "frr_by_config": {
+   "clean_attn_eager": {
+    "rate": 0.02,
+    "k": 2,
+    "n": 100,
+    "ci95_wilson": [
+     0.005501852234968185,
+     0.07001316294199365
+    ]
+   },
+   "clean_batch4": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "clean_padded_batch_length": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   }
+  },
+  "far_by_variant": {
+   "quant_8bit": {
+    "rate": 0.47,
+    "k": 47,
+    "n": 100,
+    "ci95_wilson": [
+     0.3751065198210374,
+     0.5671131686275227
+    ]
+   },
+   "quant_4bit": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "lora_merged": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "ft_drift": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   }
+  },
+  "far_all_tampered": {
+   "rate": 0.1175,
+   "k": 47,
+   "n": 400,
+   "ci95_wilson": [
+    0.08952149033047882,
+    0.1527556797282769
+   ]
+  },
+  "argmax_rule": {
+   "frr_honest_all": {
+    "rate": 0.043333333333333335,
+    "k": 13,
+    "n": 300,
+    "ci95_wilson": [
+     0.025496203603204263,
+     0.07271812912806098
+    ]
+   },
+   "far_by_variant": {
+    "quant_8bit": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 100,
+     "ci95_wilson": [
+      0.0,
+      0.03699480747600191
+     ]
+    },
+    "quant_4bit": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 100,
+     "ci95_wilson": [
+      0.0,
+      0.03699480747600191
+     ]
+    },
+    "lora_merged": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 100,
+     "ci95_wilson": [
+      0.0,
+      0.03699480747600191
+     ]
+    },
+    "ft_drift": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 100,
+     "ci95_wilson": [
+      0.0,
+      0.03699480747600191
+     ]
+    }
+   }
+  },
+  "calibration_P_clean": {
+   "ece_10bin": 0.02141148798971555,
+   "brier": 0.015359760109576664
+  }
+ },
+ "open_set_prefill": {
+  "quant_8bit": {
+   "trained_on": [
+    "quant_4bit",
+    "lora_merged",
+    "ft_drift"
+   ],
+   "far_heldout_threshold": {
+    "rate": 1.0,
+    "k": 100,
+    "n": 100,
+    "ci95_wilson": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 1.0,
+    "k": 100,
+    "n": 100,
+    "ci95_wilson": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   },
+   "heldout_predicted_counts": [
+    100,
+    0,
+    0,
+    0,
+    0
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.006666666666666667,
+    "k": 2,
+    "n": 300,
+    "ci95_wilson": [
+     0.0018301100329710784,
+     0.023978074231461442
+    ]
+   }
+  },
+  "quant_4bit": {
+   "trained_on": [
+    "quant_8bit",
+    "lora_merged",
+    "ft_drift"
+   ],
+   "far_heldout_threshold": {
+    "rate": 0.01,
+    "k": 1,
+    "n": 100,
+    "ci95_wilson": [
+     0.0017673865655472645,
+     0.0544875247609346
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "heldout_predicted_counts": [
+    0,
+    40,
+    0,
+    60,
+    0
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.01,
+    "k": 3,
+    "n": 300,
+    "ci95_wilson": [
+     0.0034065567627181124,
+     0.028984004635062833
+    ]
+   }
+  },
+  "lora_merged": {
+   "trained_on": [
+    "quant_8bit",
+    "quant_4bit",
+    "ft_drift"
+   ],
+   "far_heldout_threshold": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "heldout_predicted_counts": [
+    0,
+    0,
+    11,
+    0,
+    89
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.006666666666666667,
+    "k": 2,
+    "n": 300,
+    "ci95_wilson": [
+     0.0018301100329710784,
+     0.023978074231461442
+    ]
+   }
+  },
+  "ft_drift": {
+   "trained_on": [
+    "quant_8bit",
+    "quant_4bit",
+    "lora_merged"
+   ],
+   "far_heldout_threshold": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "heldout_predicted_counts": [
+    0,
+    0,
+    0,
+    100,
+    0
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.006666666666666667,
+    "k": 2,
+    "n": 300,
+    "ci95_wilson": [
+     0.0018301100329710784,
+     0.023978074231461442
+    ]
+   }
+  }
+ },
+ "operating_point_decode": {
+  "threshold_P_clean": 0.09911227601454087,
+  "target_train_frr": 0.01,
+  "frr_honest_all": {
+   "rate": 0.0175,
+   "k": 7,
+   "n": 400,
+   "ci95_wilson": [
+    0.008502182660789141,
+    0.03567751551790271
+   ]
+  },
+  "frr_by_config": {
+   "decode_sdpa_b1": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "attn_eager": {
+    "rate": 0.07,
+    "k": 7,
+    "n": 100,
+    "ci95_wilson": [
+     0.034318824364064096,
+     0.13749671006529757
+    ]
+   },
+   "batch4": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "padded_batch_length": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   }
+  },
+  "far_by_variant": {
+   "quant_8bit": {
+    "rate": 0.22,
+    "k": 22,
+    "n": 100,
+    "ci95_wilson": [
+     0.15001174503655804,
+     0.3107053471500031
+    ]
+   },
+   "quant_4bit": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "lora_merged": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "ft_drift": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   }
+  },
+  "far_all_tampered": {
+   "rate": 0.055,
+   "k": 22,
+   "n": 400,
+   "ci95_wilson": [
+    0.036598221864059276,
+    0.08186802826965653
+   ]
+  },
+  "argmax_rule": {
+   "frr_honest_all": {
+    "rate": 0.0325,
+    "k": 13,
+    "n": 400,
+    "ci95_wilson": [
+     0.019089659086961887,
+     0.054804659873739545
+    ]
+   },
+   "far_by_variant": {
+    "quant_8bit": {
+     "rate": 0.03,
+     "k": 3,
+     "n": 100,
+     "ci95_wilson": [
+      0.010254338223414816,
+      0.08452078080402699
+     ]
+    },
+    "quant_4bit": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 100,
+     "ci95_wilson": [
+      0.0,
+      0.03699480747600191
+     ]
+    },
+    "lora_merged": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 100,
+     "ci95_wilson": [
+      0.0,
+      0.03699480747600191
+     ]
+    },
+    "ft_drift": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 100,
+     "ci95_wilson": [
+      0.0,
+      0.03699480747600191
+     ]
+    }
+   }
+  },
+  "calibration_P_clean": {
+   "ece_10bin": 0.02345504252909096,
+   "brier": 0.017421572649442378
+  }
+ },
+ "open_set_decode": {
+  "quant_8bit": {
+   "trained_on": [
+    "quant_4bit",
+    "lora_merged",
+    "ft_drift"
+   ],
+   "far_heldout_threshold": {
+    "rate": 1.0,
+    "k": 100,
+    "n": 100,
+    "ci95_wilson": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 1.0,
+    "k": 100,
+    "n": 100,
+    "ci95_wilson": [
+     0.9630051925239981,
+     0.9999999999999999
+    ]
+   },
+   "heldout_predicted_counts": [
+    100,
+    0,
+    0,
+    0,
+    0
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.005,
+    "k": 2,
+    "n": 400,
+    "ci95_wilson": [
+     0.0013722242215711469,
+     0.018045289972112716
+    ]
+   }
+  },
+  "quant_4bit": {
+   "trained_on": [
+    "quant_8bit",
+    "lora_merged",
+    "ft_drift"
+   ],
+   "far_heldout_threshold": {
+    "rate": 0.01,
+    "k": 1,
+    "n": 100,
+    "ci95_wilson": [
+     0.0017673865655472645,
+     0.0544875247609346
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "heldout_predicted_counts": [
+    0,
+    45,
+    0,
+    55,
+    0
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.0175,
+    "k": 7,
+    "n": 400,
+    "ci95_wilson": [
+     0.008502182660789141,
+     0.03567751551790271
+    ]
+   }
+  },
+  "lora_merged": {
+   "trained_on": [
+    "quant_8bit",
+    "quant_4bit",
+    "ft_drift"
+   ],
+   "far_heldout_threshold": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "heldout_predicted_counts": [
+    0,
+    0,
+    10,
+    0,
+    90
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.01,
+    "k": 4,
+    "n": 400,
+    "ci95_wilson": [
+     0.0038954207932788126,
+     0.02542696699440824
+    ]
+   }
+  },
+  "ft_drift": {
+   "trained_on": [
+    "quant_8bit",
+    "quant_4bit",
+    "lora_merged"
+   ],
+   "far_heldout_threshold": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "far_heldout_argmax": {
+    "rate": 0.0,
+    "k": 0,
+    "n": 100,
+    "ci95_wilson": [
+     0.0,
+     0.03699480747600191
+    ]
+   },
+   "heldout_predicted_counts": [
+    0,
+    0,
+    0,
+    100,
+    0
+   ],
+   "frr_honest_threshold": {
+    "rate": 0.015,
+    "k": 6,
+    "n": 400,
+    "ci95_wilson": [
+     0.006892197870136998,
+     0.03233506351155325
+    ]
+   }
+  }
+ },
+ "per_class_prefill_oof": {
+  "clean": {
+   "precision": 0.9982935153583617,
+   "recall": 0.975,
+   "f1": 0.9865092748735245,
+   "support": 600
+  },
+  "quant_8bit": {
+   "precision": 0.961352657004831,
+   "recall": 0.995,
+   "f1": 0.9778869778869779,
+   "support": 200
+  },
+  "quant_4bit": {
+   "precision": 0.970873786407767,
+   "recall": 1.0,
+   "f1": 0.9852216748768473,
+   "support": 200
+  },
+  "lora_merged": {
+   "precision": 1.0,
+   "recall": 0.995,
+   "f1": 0.9974937343358395,
+   "support": 200
+  },
+  "ft_drift": {
+   "precision": 0.9900990099009901,
+   "recall": 1.0,
+   "f1": 0.9950248756218906,
+   "support": 200
+  }
+ },
+ "balanced_accuracy_prefill_oof": 0.993,
+ "coef_mass_by_layer": [
+  0.06504978286540314,
+  0.052312775762518735,
+  0.05588293430605915,
+  0.050005256808004335,
+  0.05713888369769124,
+  0.03236846118945562,
+  0.03282228828213267,
+  0.025847109785293497,
+  0.03244066068226526,
+  0.030826065219064003,
+  0.034036584506157264,
+  0.03573022204865187,
+  0.031139285486107702,
+  0.027773706751602234,
+  0.029670974745202423,
+  0.03504121685019543,
+  0.021470492430884506,
+  0.029387350331328214,
+  0.03734789788055621,
+  0.025613276906995677,
+  0.025768107507953702,
+  0.02512299658844703,
+  0.030066838563637528,
+  0.0296730893734758,
+  0.03046092411061998,
+  0.021188638090465294,
+  0.02928377819746985,
+  0.06653040103236162
+ ],
+ "coef_mass_by_feature": {
+  "idx_mismatch": 0.3057672455267244,
+  "exp_mismatch": 0.16746849389516139,
+  "mantissa_mean": 0.22172863248461094,
+  "mantissa_median": 0.30503562809350326
+ },
+ "kernel_policy": {
+  "S1_unrestricted": {
+   "description": "one detector accepting all honest kernels; trained on default-kernel tampering",
+   "frr_honest": {
+    "decode_sdpa_b1": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "attn_eager": {
+     "rate": 0.04,
+     "k": 2,
+     "n": 50,
+     "ci95_wilson": [
+      0.011038652660826577,
+      0.13460337877954667
+     ]
+    },
+    "batch4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "padded_batch_length": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    }
+   },
+   "far_attack": {
+    "ft_drift_eager_b1": {
+     "rate": 0.28,
+     "k": 14,
+     "n": 50,
+     "ci95_wilson": [
+      0.17474014357680362,
+      0.4166538714598967
+     ]
+    },
+    "ft_drift_sdpa_b4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "lora_merged_eager_b1": {
+     "rate": 0.28,
+     "k": 14,
+     "n": 50,
+     "ci95_wilson": [
+      0.17474014357680362,
+      0.4166538714598967
+     ]
+    },
+    "lora_merged_sdpa_b4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "quant_4bit_eager_b1": {
+     "rate": 0.68,
+     "k": 34,
+     "n": 50,
+     "ci95_wilson": [
+      0.5418944286372394,
+      0.792419559060006
+     ]
+    },
+    "quant_4bit_sdpa_b4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "quant_8bit_eager_b1": {
+     "rate": 0.92,
+     "k": 46,
+     "n": 50,
+     "ci95_wilson": [
+      0.8116149745493629,
+      0.9684509967442093
+     ]
+    },
+    "quant_8bit_sdpa_b4": {
+     "rate": 0.2,
+     "k": 10,
+     "n": 50,
+     "ci95_wilson": [
+      0.11243629945973886,
+      0.3303737210448524
+     ]
+    }
+   }
+  },
+  "S2_declared_unenforced": {
+   "description": "provider declares a kernel; validator uses that kernel's detector; attacker runs eager and picks the declaration that is accepted more often",
+   "frr_honest_eager_declares_eager": {
+    "rate": 0.02,
+    "k": 1,
+    "n": 50,
+    "ci95_wilson": [
+     0.0035391680889764604,
+     0.10495686471836953
+    ]
+   },
+   "frr_honest_sdpa_configs": {
+    "decode_sdpa_b1": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "batch4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "padded_batch_length": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    }
+   },
+   "far_eager_attack": {
+    "ft_drift_eager_b1": {
+     "declare_eager": {
+      "rate": 0.08,
+      "k": 4,
+      "n": 50,
+      "ci95_wilson": [
+       0.031549003255790686,
+       0.18838502545063704
+      ]
+     },
+     "declare_sdpa": {
+      "rate": 0.0,
+      "k": 0,
+      "n": 50,
+      "ci95_wilson": [
+       0.0,
+       0.07135003417431873
+      ]
+     },
+     "attacker_best": {
+      "rate": 0.08,
+      "k": 4,
+      "n": 50,
+      "ci95_wilson": [
+       0.031549003255790686,
+       0.18838502545063704
+      ]
+     }
+    },
+    "lora_merged_eager_b1": {
+     "declare_eager": {
+      "rate": 0.02,
+      "k": 1,
+      "n": 50,
+      "ci95_wilson": [
+       0.0035391680889764604,
+       0.10495686471836953
+      ]
+     },
+     "declare_sdpa": {
+      "rate": 0.0,
+      "k": 0,
+      "n": 50,
+      "ci95_wilson": [
+       0.0,
+       0.07135003417431873
+      ]
+     },
+     "attacker_best": {
+      "rate": 0.02,
+      "k": 1,
+      "n": 50,
+      "ci95_wilson": [
+       0.0035391680889764604,
+       0.10495686471836953
+      ]
+     }
+    },
+    "quant_4bit_eager_b1": {
+     "declare_eager": {
+      "rate": 0.06,
+      "k": 3,
+      "n": 50,
+      "ci95_wilson": [
+       0.020614596364630478,
+       0.16217343370877002
+      ]
+     },
+     "declare_sdpa": {
+      "rate": 0.0,
+      "k": 0,
+      "n": 50,
+      "ci95_wilson": [
+       0.0,
+       0.07135003417431873
+      ]
+     },
+     "attacker_best": {
+      "rate": 0.06,
+      "k": 3,
+      "n": 50,
+      "ci95_wilson": [
+       0.020614596364630478,
+       0.16217343370877002
+      ]
+     }
+    },
+    "quant_8bit_eager_b1": {
+     "declare_eager": {
+      "rate": 0.96,
+      "k": 48,
+      "n": 50,
+      "ci95_wilson": [
+       0.8653966212204534,
+       0.9889613473391734
+      ]
+     },
+     "declare_sdpa": {
+      "rate": 0.0,
+      "k": 0,
+      "n": 50,
+      "ci95_wilson": [
+       0.0,
+       0.07135003417431873
+      ]
+     },
+     "attacker_best": {
+      "rate": 0.96,
+      "k": 48,
+      "n": 50,
+      "ci95_wilson": [
+       0.8653966212204534,
+       0.9889613473391734
+      ]
+     }
+    }
+   },
+   "note": "validator reference is an SDPA prefill even when eager is declared; an eager reference prefill was not collected"
+  },
+  "S3_enforced_sdpa": {
+   "description": "kernel enforced to SDPA; attacker limited to SDPA serving (default batch 1 and batch 4)",
+   "frr_honest": {
+    "decode_sdpa_b1": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "batch4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "padded_batch_length": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    }
+   },
+   "far_default_kernel": {
+    "quant_8bit": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "quant_4bit": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "lora_merged": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "ft_drift": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    }
+   },
+   "far_sdpa_b4_attack": {
+    "ft_drift_sdpa_b4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "lora_merged_sdpa_b4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "quant_4bit_sdpa_b4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    },
+    "quant_8bit_sdpa_b4": {
+     "rate": 0.0,
+     "k": 0,
+     "n": 50,
+     "ci95_wilson": [
+      0.0,
+      0.07135003417431873
+     ]
+    }
+   }
+  }
+ },
+ "topk_sensitivity_prefill": {
+  "16": {
+   "balanced_accuracy": 0.9623333333333333,
+   "eager_flag_rate": 0.125,
+   "tamper_called_clean": 0.01875
+  },
+  "32": {
+   "balanced_accuracy": 0.984,
+   "eager_flag_rate": 0.095,
+   "tamper_called_clean": 0.0075
+  },
+  "64": {
+   "balanced_accuracy": 0.9863333333333333,
+   "eager_flag_rate": 0.11,
+   "tamper_called_clean": 0.0025
+  },
+  "128": {
+   "balanced_accuracy": 0.993,
+   "eager_flag_rate": 0.065,
+   "tamper_called_clean": 0.00125
+  }
+ }
+}

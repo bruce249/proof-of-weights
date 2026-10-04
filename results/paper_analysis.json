@@ -4,6 +4,21 @@
  "model": "LogisticRegression balanced",
  "matched": {
   "pooled_reproduction": {
+   "fold_balanced_accuracy": {
+    "folds": [
+     0.9949999999999999,
+     0.9949999999999999,
+     0.9949999999999999,
+     1.0,
+     0.99
+    ],
+    "mean": 0.9949999999999999,
+    "std": 0.0035355339059327407,
+    "ci95": [
+     0.9906107586076862,
+     0.9993892413923136
+    ]
+   },
    "balanced_accuracy": 0.9949999999999999,
    "honest_flag_rate": {
     "clean": 0.01
@@ -53,6 +68,21 @@
    ]
   },
   "separate_axes": {
+   "fold_balanced_accuracy": {
+    "folds": [
+     0.9949999999999999,
+     0.9949999999999999,
+     0.985,
+     0.9983333333333334,
+     0.9916666666666668
+    ],
+    "mean": 0.993,
+    "std": 0.005055250296034359,
+    "ci95": [
+     0.9867240839889481,
+     0.9992759160110519
+    ]
+   },
    "balanced_accuracy": 0.993,
    "honest_flag_rate": {
     "clean_attn_eager": 0.065,
@@ -326,6 +356,26 @@
      1
     ]
    }
+  },
+  "without_eager_training": {
+   "honest_flag_rate": {
+    "clean_attn_eager": 1.0,
+    "clean_batch4": 0.0,
+    "clean_padded_batch_length": 0.0
+   },
+   "detect_rate": {
+    "quant_8bit": 1.0,
+    "quant_4bit": 1.0,
+    "lora_merged": 1.0,
+    "ft_drift": 1.0
+   },
+   "correct_class_rate": {
+    "quant_8bit": 1.0,
+    "quant_4bit": 1.0,
+    "lora_merged": 0.995,
+    "ft_drift": 1.0
+   },
+   "tampered_correct": 799
   },
   "ablations": {
    "all_layers_all_features": {
@@ -1428,6 +1478,21 @@
  },
  "shared": {
   "pooled_reproduction": {
+   "fold_balanced_accuracy": {
+    "folds": [
+     0.9949999999999999,
+     1.0,
+     1.0,
+     1.0,
+     0.9949999999999999
+    ],
+    "mean": 0.998,
+    "std": 0.002738612787525894,
+    "ci95": [
+     0.9946001082370168,
+     1.0013998917629832
+    ]
+   },
    "balanced_accuracy": 0.998,
    "honest_flag_rate": {
     "clean": 0.01
@@ -1477,6 +1542,21 @@
    ]
   },
   "separate_axes": {
+   "fold_balanced_accuracy": {
+    "folds": [
+     0.9916666666666668,
+     0.985,
+     0.9916666666666668,
+     0.9883333333333333,
+     0.9966666666666667
+    ],
+    "mean": 0.9906666666666668,
+    "std": 0.004346134936801805,
+    "ci95": [
+     0.9852710925133032,
+     0.9960622408200304
+    ]
+   },
    "balanced_accuracy": 0.9906666666666666,
    "honest_flag_rate": {
     "clean_attn_eager": 0.075,
@@ -1580,6 +1660,26 @@
      1
     ]
    }
+  },
+  "without_eager_training": {
+   "honest_flag_rate": {
+    "clean_attn_eager": 1.0,
+    "clean_batch4": 0.0,
+    "clean_padded_batch_length": 0.0
+   },
+   "detect_rate": {
+    "quant_8bit": 1.0,
+    "quant_4bit": 1.0,
+    "lora_merged": 1.0,
+    "ft_drift": 1.0
+   },
+   "correct_class_rate": {
+    "quant_8bit": 1.0,
+    "quant_4bit": 1.0,
+    "lora_merged": 1.0,
+    "ft_drift": 1.0
+   },
+   "tampered_correct": 800
   },
   "ablations": {
    "all_layers_all_features": {

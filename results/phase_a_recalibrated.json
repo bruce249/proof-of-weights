@@ -1,0 +1,119 @@
+{
+ "written_at": "2026-10-03T23:47:43.253268+00:00",
+ "split": "calibrate on prompts 0-99, held-out FPR on 100-199, detect rate on 0-199",
+ "sanity_original_thresholds": {
+  "T_exp": 46.01999999999998,
+  "T_mean": 25.8026844642195,
+  "T_median": 20.0
+ },
+ "all_three_axes": {
+  "thresholds": {
+   "T_exp": 46.01999999999998,
+   "T_mean": 25.8026844642195,
+   "T_median": 20.0
+  },
+  "calibrated_on_axes": [
+   "attn_eager",
+   "batch4",
+   "padded_batch_length"
+  ],
+  "heldout_fpr_calibration_axes": 0.02,
+  "heldout_fpr_by_axis": {
+   "attn_eager": 0.06,
+   "batch4": 0.0,
+   "padded_batch_length": 0.0
+  },
+  "detect_rate": {
+   "quant_8bit": 0.0,
+   "quant_4bit": 0.0,
+   "lora_merged": 0.595,
+   "ft_drift": 0.545
+  }
+ },
+ "without_eager": {
+  "thresholds": {
+   "T_exp": 7.009999999999991,
+   "T_mean": 1.796029246344205,
+   "T_median": 1.0
+  },
+  "calibrated_on_axes": [
+   "batch4",
+   "padded_batch_length"
+  ],
+  "heldout_fpr_calibration_axes": 0.04,
+  "heldout_fpr_by_axis": {
+   "attn_eager": 1.0,
+   "batch4": 0.03,
+   "padded_batch_length": 0.05
+  },
+  "detect_rate": {
+   "quant_8bit": 1.0,
+   "quant_4bit": 1.0,
+   "lora_merged": 1.0,
+   "ft_drift": 1.0
+  }
+ },
+ "published_thresholds": {
+  "thresholds": {
+   "T_exp": 38.0,
+   "T_mean": 10.0,
+   "T_median": 8.0
+  },
+  "calibrated_on_axes": [
+   "attn_eager",
+   "batch4",
+   "padded_batch_length"
+  ],
+  "heldout_fpr_calibration_axes": 0.23,
+  "heldout_fpr_by_axis": {
+   "attn_eager": 0.69,
+   "batch4": 0.0,
+   "padded_batch_length": 0.0
+  },
+  "detect_rate": {
+   "quant_8bit": 0.0,
+   "quant_4bit": 0.5,
+   "lora_merged": 1.0,
+   "ft_drift": 1.0
+  }
+ },
+ "per_variant_medians": {
+  "quant_8bit": {
+   "exp_mismatches_max": 9.0,
+   "mant_err_mean_max": 3.2982325910215624,
+   "mant_err_median_max": 3.0
+  },
+  "quant_4bit": {
+   "exp_mismatches_max": 20.0,
+   "mant_err_mean_max": 9.740137993100344,
+   "mant_err_median_max": 8.0
+  },
+  "lora_merged": {
+   "exp_mismatches_max": 43.5,
+   "mant_err_mean_max": 24.925133689839573,
+   "mant_err_median_max": 21.0
+  },
+  "ft_drift": {
+   "exp_mismatches_max": 41.0,
+   "mant_err_mean_max": 23.69111842105263,
+   "mant_err_median_max": 19.5
+  }
+ },
+ "per_axis_medians": {
+  "attn_eager": {
+   "exp_mismatches_max": 24.0,
+   "mant_err_mean_max": 13.17531328320802,
+   "mant_err_median_max": 10.0
+  },
+  "batch4": {
+   "exp_mismatches_max": 4.0,
+   "mant_err_mean_max": 1.3293543307086615,
+   "mant_err_median_max": 1.0
+  },
+  "padded_batch_length": {
+   "exp_mismatches_max": 4.0,
+   "mant_err_mean_max": 1.3266984126984127,
+   "mant_err_median_max": 1.0
+  }
+ }
+}

@@ -1,0 +1,68 @@
+{
+ "bf16": {
+  "new_tokens": 128,
+  "timed_runs": 2,
+  "warmup_runs": 1,
+  "by_batch": {
+   "1": {
+    "seconds": 3.27512788772583,
+    "tokens_per_second": 39.082443308459666,
+    "peak_memory_mib": 2962.84326171875
+   },
+   "8": {
+    "seconds": 3.964505910873413,
+    "tokens_per_second": 258.29195945741554,
+    "peak_memory_mib": 3290.943359375
+   },
+   "32": {
+    "seconds": 8.2875736951828,
+    "tokens_per_second": 494.233915817946,
+    "peak_memory_mib": 6209.22802734375
+   }
+  }
+ },
+ "int8": {
+  "new_tokens": 128,
+  "timed_runs": 2,
+  "warmup_runs": 1,
+  "by_batch": {
+   "1": {
+    "seconds": 15.945911765098572,
+    "tokens_per_second": 8.027135850592032,
+    "peak_memory_mib": 1723.0419921875
+   },
+   "8": {
+    "seconds": 18.531888365745544,
+    "tokens_per_second": 55.25610665196796,
+    "peak_memory_mib": 2177.56201171875
+   },
+   "32": {
+    "seconds": 24.99795174598694,
+    "tokens_per_second": 163.8534245373745,
+    "peak_memory_mib": 6235.92529296875
+   }
+  }
+ },
+ "nf4": {
+  "new_tokens": 128,
+  "timed_runs": 2,
+  "warmup_runs": 1,
+  "by_batch": {
+   "1": {
+    "seconds": 4.351179838180542,
+    "tokens_per_second": 29.41730858302643,
+    "peak_memory_mib": 1186.64013671875
+   },
+   "8": {
+    "seconds": 5.041986346244812,
+    "tokens_per_second": 203.09456029420988,
+    "peak_memory_mib": 1494.8828125
+   },
+   "32": {
+    "seconds": 8.596672058105469,
+    "tokens_per_second": 476.46344682161515,
+    "peak_memory_mib": 4413.16748046875
+   }
+  }
+ }
+}

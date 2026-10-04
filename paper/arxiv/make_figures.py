@@ -211,3 +211,25 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def fig_coef():
+    """Share of |standardised coefficient| per layer (all classes, all features)."""
+    r = json.loads((RES / "review_analysis.json").read_text(encoding="utf-8"))
+    mass = 100 * np.array(r["coef_mass_by_layer"])
+    fig, ax = plt.subplots(figsize=(COL_W, 1.7))
+    ax.bar(np.arange(28), mass, color="#2a78d6", width=0.75, linewidth=0)
+    ax.axhline(100 / 28, color=INK2, lw=0.7, ls="--")
+    ax.text(24.4, 100 / 28 + 0.25, "uniform", fontsize=6.3, color=INK2, ha="right", va="bottom")
+    ax.set_xlim(-0.6, 27.6)
+    ax.set_xticks([0, 7, 14, 21, 27])
+    ax.set_xlabel("Decoder layer")
+    ax.set_ylabel("Weight share (%)")
+    ax.grid(axis="x", visible=False)
+    fig.savefig(OUT / "coef.pdf")
+    plt.close(fig)
+
+
+if __name__ == "__main__":
+    style()
+    fig_coef()

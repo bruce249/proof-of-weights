@@ -1,143 +1,174 @@
-\documentclass[11pt]{article}
+\documentclass[10pt,twocolumn]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{microtype}
-\usepackage[margin=1in]{geometry}
+\usepackage[margin=0.75in,columnsep=0.25in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{array}
 \usepackage{graphicx}
-\usepackage{xcolor}
+\usepackage[table]{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,fit}
+\usetikzlibrary{arrows.meta,positioning}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{caption}
-\captionsetup{font=small,labelfont=bf}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
 \usepackage{enumitem}
 \setlist{nosep,leftmargin=*}
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref}
 
-\newcommand{\lasthid}{\textsc{LastHidden}}
-\newcommand{\perlayer}{\textsc{PerLayer}}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.8}
+
 \newcommand{\topk}{top-$k$}
+\newcommand{\best}[1]{\cellcolor{blue!8}#1}
+\newcommand{\up}{$\uparrow$}
+\newcommand{\down}{$\downarrow$}
+\newcommand{\ci}[2]{{\scriptsize[#1--#2]}}
 
-\title{Proof of Weights: Per-Layer Activation Profiles\\for Attributing Weight Tampering in Verifiable LLM Inference}
-
+\title{Detecting Weight Tampering in Verifiable LLM Inference:\\Per-Layer Activation Profiles and the Attention-Kernel Loophole}
 \author{
-  % TODO: replace with the real author list before submission.
-  Author Name\\
+  Vignesh Kanike\\
   Indian Institute of Technology Delhi\\
   \texttt{ms1240669@iitd.ac.in}
 }
-
 \date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Decentralised inference markets pay GPU providers to run a named open-weight model, but a provider can quietly serve a quantised or fine-tuned copy instead.
-TOPLOC (Ong et al., ICML 2025) commits to the \topk{} entries of the last hidden state and verifies them with a single prefill, but its authors note that small fine-tuning updates are harder to detect than model swaps and leave them to future work.
-We study this gap on Qwen2.5-1.5B-Instruct with four tampered variants: 8-bit and 4-bit (NF4) quantisation, a merged LoRA adapter, and a 300-step full fine-tune.
-First, a reproduction: with thresholds calibrated to a 2\% held-out false-positive rate (FPR) on honest traffic that varies the attention kernel and batch shape, the last-hidden-state check detects 0\% of quantised sequences and 55--60\% of fine-tuned ones; the published thresholds yield a 23\% FPR on the same honest traffic.
-Second, we extend the comparison from one layer to all 28 decoder layers.
-A logistic-regression classifier over a 112-dimensional per-layer profile separates honest traffic from the four tamper classes with 99.3\% balanced accuracy under prompt-grouped cross-validation, and detects 90--100\% of tampered sequences at a 1\% FPR.
-Restricting the same classifier to the last layer drops balanced accuracy to 78.0\%; the first half of the network alone reaches 98.6\%.
-The result holds when both models read identical text (99.1\%), so it reflects the weights rather than the generated tokens.
-Third, the profile does not generalise to an honest configuration that is absent from training: an unseen eager-attention kernel is flagged on 100\% of prompts.
-Finally, we attach the classifier to a staked optimistic-challenge contract that records the attributed tamper class on chain, and we measure serving cost on an A10G, where both quantised modes decode \emph{slower} than bf16, so a time-based stake bound gives no constraint in this setting.
+Clients of inference providers usually cannot tell whether the open-weight model they paid for was run, or a cheaper quantised or fine-tuned copy.
+TOPLOC (Ong et al., ICML 2025) lets a provider commit to the largest entries of the last hidden state, which a validator checks with one prefill, using thresholds loose enough to absorb honest numerical noise.
+On Qwen2.5-1.5B-Instruct we find that this tolerance is the weak point: serving the reference model with eager attention changes the last layer more than 8-bit or 4-bit quantisation, so thresholds that accept it flag no quantised sequence and 55--60\% of fine-tuned ones.
+Kernel noise and weight changes differ across depth, and a linear classifier on TOPLOC's statistics at all 28 layers attributes four known modifications with 99.3\% balanced accuracy (99.0\% from decode-time activations), against 78.0\% from the last layer alone.
+We then test it as an integrity check against three kinds of provider.
+It is not one in general: 8-bit quantisation left out of training is accepted on every test prompt, and a provider that serves quantised weights with eager attention is accepted on 92\% (8-bit) and 68\% (4-bit) of prompts at a 1\% false-rejection target.
+With the kernel enforced, none of eight such attacks, six unseen partial or combined modifications, or a detector-guided choice of layers to quantise was accepted (0 of 50 per case).
+On a second model, SmolLM2-1.7B, eager noise is small, the last layer alone suffices, and the loophole does not appear.
+A per-layer TOPLOC commitment costs 57.8\,kB per 256 tokens.
+Neither check binds the served text to the weights that generated it, so the results bound what activation checks can establish rather than provide an integrity guarantee.
 \end{abstract}
 
 %=====================================================================
 \section{Introduction}
 \label{sec:intro}
 
-Open-weight language models are increasingly served by third parties: commercial APIs, decentralised compute networks, and peer-to-peer inference markets.
-The client names a model and pays per token, but has no direct way to see which weights produced the response.
-A provider can save memory or compute by quantising the model, or can serve a fine-tuned copy, and the text it returns will usually look fluent.
-Gao et al.~\cite{gao2025model} found that 11 of 31 commercial endpoints for four Llama models served output distributions that differ from the reference weights.
+Open-weight language models are now served by many third parties: commercial APIs, decentralised compute networks and peer-to-peer inference markets.
+A client names a model and pays per token, but it sees only text.
+A provider that quantises the model or swaps in a fine-tuned copy saves memory or compute, and the text still reads well.
+Gao et al.~\cite{gao2025model} tested 31 commercial endpoints for four Llama models and found 11 serving a different output distribution from the published weights.
 
-Cryptographic proofs of inference~\cite{sun2024zkllm,ghodsi2017safetynets} give strong guarantees, but they remain orders of magnitude too slow for serving.
-Trusted execution environments~\cite{tramer2019slalom,cai2025auditing} move trust to hardware vendors.
-Black-box statistical tests on output text~\cite{gao2025model} need many samples per prompt and lose power against small changes~\cite{cai2025auditing}.
-TOPLOC~\cite{ong2025toploc} occupies a middle ground: the provider commits to the \topk{} values of the last hidden state every 32 generated tokens, and a validator recomputes them with a single prefill pass.
-The check tolerates honest numerical noise from different GPUs and kernels by thresholding exponent and mantissa disagreements, and the original paper reports perfect separation of model, prompt and precision changes.
-The TOPLOC authors also observe that detecting small gradient updates in fine-tuned models is harder than detecting a model swap, and they leave it open.
+TOPLOC~\cite{ong2025toploc} offers a cheap check.
+Every 32 tokens the provider commits to the 128 largest entries of the last hidden state, and a validator recomputes them in a single prefill.
+Because bf16 arithmetic differs slightly between GPUs and kernels, the validator accepts small exponent and mantissa disagreements and flags a sequence only above fixed thresholds.
+That tolerance is where the difficulty lies.
+A verifier has to accept every authorised execution, including honest providers on different kernels, and reject every unauthorised one.
+If honest variation and weight tampering produce disagreements of the same size, no threshold does both.
 
-This paper asks two questions about that open case.
-(1) Does the last-hidden-state check detect quantisation and light fine-tuning once its thresholds are set to tolerate realistic honest noise?
-(2) If not, does the same \topk{} comparison, applied at every decoder layer, both detect the modification and \emph{identify} which one occurred?
-Attribution matters for enforcement: a staking protocol that slashes providers can record what was detected, and the record distinguishes a cost-saving quantisation from a behaviour-changing fine-tune.
+We find exactly this overlap on Qwen2.5-1.5B-Instruct.
+Serving the reference model with eager attention, a kernel TOPLOC did not evaluate, changes the last layer about six times as much as a batch-size change and more than 8-bit or 4-bit quantisation.
+With thresholds calibrated to accept eager traffic, the check flags no quantised sequence and 55--60\% of fine-tuned ones.
 
-\paragraph{Contributions.}
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\linewidth]{figures/profiles.pdf}
+\caption{Kernel noise and weight changes peak at different depths. Mean \topk{} disagreement with the reference model at each decoder layer (Qwen2.5-1.5B-Instruct, 200 prompts). Grey lines are honest serving configurations; coloured lines are tampered weights. At layer 27, eager-attention noise sits among the quantised models; in the early layers it stands apart.}
+\label{fig:profiles}
+\end{figure*}
+
+The two sources do differ in where they appear (\cref{fig:profiles}).
+Eager-attention noise is largest in the first layers and fades with depth, quantisation shifts every layer by about the same amount, and fine-tuning grows toward the output.
+We compute TOPLOC's statistics at all 28 layers and train a linear classifier on the resulting profile.
+On the four modifications we trained on, it identifies the modification with 99.3\% balanced accuracy while accepting both kernels.
+
+That number answers a narrower question than integrity verification, and most of this paper is about the gap.
+We evaluate the profile against three kinds of provider (\cref{sec:threat}): one that tampers without regard to the detector, one that also chooses its kernel and batch size, and one that uses the detector's own score to choose what to quantise.
+We also test modifications the classifier never saw, report false acceptance and false rejection rates at a fixed operating point with intervals, and separate what our implementation checks from what a deployed protocol would still have to guarantee.
+
+Our findings, each tested in \cref{sec:results}:
 \begin{itemize}
-  \item \textbf{A calibrated reproduction with a negative result} (\cref{sec:res-lasthidden}). We calibrate TOPLOC's three thresholds on 100 honest prompts that vary attention kernel and batch shape, and validate on a disjoint 100 (2\% FPR). Under these thresholds the last-hidden check misses all 8-bit and 4-bit sequences, and catches 59.5\% (LoRA) and 54.5\% (full fine-tune) of the fine-tuned ones. The published thresholds produce a 23\% FPR on the same honest prompts. We trace the failure to one noisy honest axis, the eager attention kernel.
-  \item \textbf{Per-layer attribution} (\cref{sec:res-attrib,sec:res-ablation}). A linear classifier on per-layer \topk{} disagreement profiles reaches 99.3\% five-class balanced accuracy and 90--100\% detection at 1\% FPR. Ablations show that the gain comes from depth: the last layer alone gives 78.0\%, the first 14 layers give 98.6\%. Identical-text controls and pre-EOS controls rule out the generated text as the main signal.
-  \item \textbf{A generalisation failure, measured} (\cref{sec:res-generalise}). When one honest kernel configuration is withheld from training, the classifier flags all 200 of its prompts as tampered. Per-layer profiles are only as reliable as the honest configurations they were trained on.
-  \item \textbf{Enforcement and cost} (\cref{sec:enforce,sec:res-cost}). We implement an optimistic challenge contract with a stake, a challenge bond and a typed tamper class, and run an end-to-end slash. We measure serving cost and find that on our A10G setup the quantised models decode 1.3--4.9$\times$ slower than bf16, so a time-saving argument for a large stake does not apply there.
+  \item With thresholds calibrated on mixed honest kernels, TOPLOC's last-layer check misses 8-bit and 4-bit quantisation and about half of light fine-tuning in our setup (\cref{sec:res-baseline}).
+  \item The per-layer profile identifies four \emph{known} modifications with 99.3\% balanced accuracy, 99.0\% from decode-time activations, and most of its signal lies in the early and middle layers (\cref{sec:res-profile,sec:res-ablation,sec:res-decode}).
+  \item It does not establish integrity against unknown modifications: 8-bit quantisation left out of training is accepted as clean on every test prompt (\cref{sec:res-open}).
+  \item A provider that serves quantised weights with eager attention passes as honest on most prompts, even when the verifier uses a detector specific to the declared kernel. With the kernel enforced, no tested attack was accepted (\cref{sec:res-attack}).
+  \item Six modifications never seen in training, including LoRA with 4-bit weights and partial quantisation, and a detector-guided choice of layers to quantise were all rejected with the kernel enforced; on SmolLM2-1.7B the kernel loophole does not appear and the last layer alone suffices, so both the problem and the benefit are model-dependent (\cref{sec:res-open,sec:res-aware,sec:res-smol}).
+  \item A real per-layer TOPLOC commitment costs 57.8\,kB per 256 tokens and 0.5\,s of CPU time per sequence, and at batch 32 4-bit decoding reaches 96\% of bf16 throughput with less memory (\cref{sec:res-cost}).
 \end{itemize}
-All result files, the feature-extraction code shared by the offline and live paths, and the contract are released with the paper.
+Code and result files are at \url{https://github.com/bruce249/proof-of-weights}.
 
 %=====================================================================
 \section{Background and related work}
 \label{sec:related}
 
 \paragraph{TOPLOC.}
-For a sequence of generated tokens, TOPLOC~\cite{ong2025toploc} records the last hidden state at one position per block of 32 decode steps, keeps the $k{=}128$ entries of largest magnitude, and encodes their indices and values as a polynomial commitment of a few hundred bytes.
-A validator runs one prefill over the prompt and the claimed output, extracts the same positions, and compares.
-Because bf16 arithmetic differs across kernels and hardware, the comparison is tolerant: it counts \topk{} index mismatches, exponent mismatches between corresponding values, and the mean and median absolute mantissa difference, and accepts if each statistic is below a threshold.
-The published thresholds are $T_{\exp}{=}38$, $T_{\text{mean}}{=}10$, $T_{\text{median}}{=}8$.
-The check is locality-sensitive in the sense of~\cite{indyk1998lsh}: small honest perturbations map to small disagreements.
+TOPLOC~\cite{ong2025toploc} records the last hidden state at one position per 32 decode steps, keeps its $k{=}128$ largest-magnitude entries, and encodes them in a polynomial commitment of a few hundred bytes.
+The validator prefills the prompt and the claimed output with the committed weights, counts exponent mismatches between corresponding values, and takes the mean and median mantissa difference.
+A sequence fails if the largest value of any statistic across its checkpoints exceeds a threshold; the published thresholds are $T_{\exp}{=}38$, $T_{\text{mean}}{=}10$ and $T_{\text{median}}{=}8$.
+Its robustness tests covered A100 and RTX 4090 GPUs, Flash Attention 2, SDPA and FlexAttention, and tensor parallelism on Llama-3.1-8B and larger models, with no false positives~\cite[\S5.6, Table~2]{ong2025toploc}.
+It did not test quantisation, notes that small fine-tuning updates are harder to detect~\cite[\S6.5]{ong2025toploc}, and cannot detect speculative decoding~\cite[\S6.2]{ong2025toploc}.
 
-\paragraph{Verifiable and auditable inference.}
-zkLLM~\cite{sun2024zkllm} produces zero-knowledge proofs for 13B-parameter models in about 15 minutes per inference.
-SafetyNets~\cite{ghodsi2017safetynets} and Slalom~\cite{tramer2019slalom} use interactive proofs and trusted hardware.
-Cai et al.~\cite{cai2025auditing} show that text-only tests are query-hungry and that log-probability tests are confounded by inference nondeterminism, and argue for TEEs.
-SVIP~\cite{sun2025svip} trains a proxy task on returned hidden states to detect substitution with a smaller model; it targets model swaps rather than quantisation or fine-tuning of the same model.
-Model equality testing~\cite{gao2025model} frames the problem as a two-sample test on output text.
-Our work stays within TOPLOC's activation-commitment model and asks how much more it can say about \emph{which} modification occurred.
+\paragraph{Statistical detection versus proof.}
+Zero-knowledge proofs of inference such as zkLLM~\cite{sun2024zkllm} establish that a specific computation was performed, at minutes per query for a 13B model; SafetyNets~\cite{ghodsi2017safetynets} uses interactive proofs for smaller networks.
+Trusted execution~\cite{tramer2019slalom,cai2025auditing} instead relies on the hardware vendor.
+TOPLOC and the method in this paper are statistical tests: they bound how far observed activations may deviate from a recomputation, and their guarantees are only as strong as the separation between honest and dishonest deviations, which is what we measure.
 
-\paragraph{Optimistic verification.}
-Optimistic rollups and Truebit~\cite{teutsch2019truebit} accept results by default and resolve disputes on challenge; opML~\cite{conway2024opml} applies the pattern to ML inference with an interactive fraud-proof game.
-TOPLOC is protocol-agnostic and does not specify a stake or slash.
-We implement the simplest optimistic layer, with a single trusted validator, to show what an attribution label adds to the on-chain record.
+\paragraph{Detecting substitution.}
+Model equality testing~\cite{gao2025model} compares output text with a two-sample test; Cai et al.~\cite{cai2025auditing} show such tests need many queries and that log-probability tests are confused by nondeterministic inference.
+SVIP~\cite{sun2025svip} trains a proxy task on returned hidden states to detect substitution with a smaller model.
+These methods target swaps between different models, whereas we study quantisation and fine-tuning of the same model.
 
-\paragraph{Honest nondeterminism.}
-LLM inference is not bitwise reproducible across batch sizes, padding and kernels~\cite{he2025nondeterminism}.
-Any activation-based check must tolerate this noise.
-Our results show that its size depends strongly on the source: switching the attention kernel produces far larger disagreements than changing the batch shape (\cref{tab:noise}).
+\paragraph{Nondeterminism and enforcement.}
+Inference is not bitwise reproducible across batch sizes, padding and kernels~\cite{he2025nondeterminism}, so every activation check needs some tolerance.
+Optimistic protocols such as Truebit~\cite{teutsch2019truebit} and opML~\cite{conway2024opml} accept results by default and settle disputes on challenge; TOPLOC has no stake or penalty.
 
 %=====================================================================
-\section{Setting and threat model}
+\section{Threat model and problem}
 \label{sec:threat}
 
-A \emph{provider} registers a commitment to a model (here, a Hugging Face repository and pinned revision), posts a stake, and serves requests.
-For each response it submits a proof hash on chain and stores the proof off chain.
-A \emph{validator} samples submitted proofs, recomputes activations with the committed weights, and resolves challenges.
-\emph{Challengers} post a bond to dispute a proof within a fixed window.
+\paragraph{Assets and parties.}
+The asset is the client's assurance that a response was produced by the committed weights $\theta$, a model repository at a pinned revision.
+A \emph{provider} stakes tokens, serves requests and posts a commitment for each response.
+A \emph{validator} samples commitments, recomputes activations with $\theta$, and resolves challenges.
+We trust the validator to run $\theta$ and to report its verdict honestly.
+The contract enforces the stake, the bond and the dispute window; it does not check the verdict.
 
-\paragraph{Adversary.}
-The provider serves the requested prompt with weights $\tilde\theta \neq \theta$, where $\tilde\theta$ is a quantised or fine-tuned version of the committed weights $\theta$, and produces the proof honestly from $\tilde\theta$'s activations.
-We consider four modifications (\cref{tab:variants}).
-We do not consider a provider that forges activations, serves a different prompt, or uses speculative decoding, which TOPLOC already identifies as undetectable by its check.
+\paragraph{Authorised variation.}
+An honest provider runs $\theta$ but may use a different attention kernel, batch size or padding from the validator.
+In our experiments the authorised set is SDPA at batch 1 (the validator's own setting), eager attention at batch 1, SDPA at batch 4, and SDPA at batch 4 with extra padding.
 
-\paragraph{Honest variation.}
-An honest provider runs $\theta$ but may use a different attention kernel, batch size or padding than the validator.
-A useful check must accept such traffic.
-We model this with three honest perturbation axes (\cref{sec:setup}).
+\paragraph{Attacker.}
+A dishonest provider wants to serve weights $\tilde\theta \neq \theta$ to save memory or compute, or to change behaviour, without losing its stake.
+It controls its weights, kernel and batch configuration, and computes its commitments honestly from what it actually ran.
+We distinguish three levels of knowledge and control:
+\begin{itemize}
+  \item \textbf{A1, non-adaptive}: serves a quantised or fine-tuned model on the reference kernel, without regard to the detector.
+  \item \textbf{A2, configuration-adaptive}: additionally chooses an authorised kernel or batch size to look honest.
+  \item \textbf{A3, detector-adaptive}: knows the detector and uses its score to choose the modification.
+\end{itemize}
+We evaluate A1 and A2 fully. For A3 we evaluate one constrained strategy, choosing which layers to quantise (\cref{sec:res-aware}); we do not optimise weights against the detector by gradient, and we make no claim of robustness to that.
 
-\paragraph{Trust assumptions.}
-The validator is trusted to run $\theta$ and to report honestly.
-The contract enforces the stake, the dispute window and the payout, but not the correctness of the verdict.
+\paragraph{Out of scope.}
+We do not address forged or replayed commitments, a provider that answers verification samples differently from ordinary traffic, or a provider that generates with $\tilde\theta$ and then computes its commitment by a prefill with $\theta$.
+The last case defeats both TOPLOC and our check, and is discussed in \cref{sec:security}.
+
+\paragraph{Detection and attribution.}
+Integrity verification is a binary decision: accept a sequence as produced by $\theta$ under authorised variation, or reject it.
+We report it as the false acceptance rate (FAR, tampered sequences accepted) and the false rejection rate (FRR, honest sequences rejected).
+Attribution, naming which known modification was made, is a separate closed-set task and is reported as balanced accuracy.
 
 %=====================================================================
 \section{Method}
 \label{sec:method}
 
-\begin{figure}[t]
+\begin{figure*}[!t]
 \centering
 \begin{tikzpicture}[
   node distance=6mm and 9mm,
@@ -158,403 +189,650 @@ The contract enforces the stake, the dispute window and the payout, but not the 
 \draw[arr] (clf) -- node[lab, above] {\texttt{resolve}} (chain);
 \draw[arr] (prov.south) |- node[lab, pos=0.75, below] {\texttt{submitProof}: proof hash; stake held} ([yshift=-5mm]chain.south) -- (chain.south);
 \end{tikzpicture}
-\caption{System overview. The provider's per-layer \topk{} activations are compared with the validator's prefill under the committed weights. The resulting disagreement profile is classified, and an upheld challenge slashes the stake and records the class on chain.}
+\caption{Overview. The provider's per-layer \topk{} activations are compared with a validator prefill under the committed weights (\cref{sec:profile}). A classifier turns the profile into a verdict (\cref{sec:classifier}), and an upheld challenge slashes the stake and stores the label (\cref{sec:protocol}).}
 \label{fig:overview}
-\end{figure}
+\end{figure*}
 
-\subsection{Last-hidden-state check (reproduction)}
-\label{sec:method-lasthidden}
+\subsection{Per-layer disagreement profile}
+\label{sec:profile}
 
-We use the reference implementation (\texttt{toploc} 0.1.6) unchanged: $k{=}128$, one proof per 32 decode tokens, eight proofs per 256-token generation.
-For each sequence we take the maximum over its eight proofs of the three statistics (exponent mismatches, mean and median mantissa difference) and flag the sequence if any maximum exceeds its threshold.
-Proofs are built from CPU bf16 copies of the activations; the library's polynomial construction failed on CUDA tensors in our environment.
-
-\paragraph{Calibration.}
-Thresholds are the 99th percentiles of the three statistics over honest sequences from prompts 0--99, pooling the three honest axes.
-We report the realised FPR on prompts 100--199, which were not used for calibration, and require it to be below 3\%.
-We also report the FPR of the published thresholds on the same held-out prompts.
-
-\subsection{Per-layer disagreement profiles}
-\label{sec:method-perlayer}
-
-Let $h^{(\ell)}_t \in \mathbb{R}^{d}$ be the output of decoder layer $\ell \in \{0,\dots,L{-}1\}$ at position $t$, with $L{=}28$ and $d{=}1536$.
-At each checkpoint position $t_c = |\text{prompt}| + 32c$, $c \in \{0,\dots,7\}$, we record the indices $I^{(\ell)}_c$ and values $v^{(\ell)}_c$ of the $k{=}128$ largest-magnitude entries of $h^{(\ell)}_{t_c}$ (sorted by magnitude).
-We do this for the model under test and for the reference model $\theta$ on the same token sequence, both with a teacher-forced prefill.
-For each $(c,\ell)$ we compute four statistics, using the same definitions as TOPLOC:
+Let $h^{(\ell)}_t \in \mathbb{R}^{1536}$ be the output of decoder layer $\ell \in \{0,\dots,27\}$ at position $t$.
+At each checkpoint $t_c = |\text{prompt}| + 32c$ with $c = 0,\dots,7$, we take the indices $I$ and values $v$ of the 128 largest-magnitude entries of $h^{(\ell)}_{t_c}$, for the model under test and for $\theta$ on the same tokens.
+For each checkpoint and layer we compute the overlap of the index sets and TOPLOC's three statistics:
 \begin{align*}
-  f_{\text{idx}} &= 1 - \tfrac{1}{k}\,\bigl|\tilde I \cap I\bigr|, &
-  f_{\exp} &= \textstyle\sum_{i} \mathbb{1}\bigl[\operatorname{exp}(\tilde v_i) \neq \operatorname{exp}(v_i)\bigr], \\
-  f_{\text{mean}} &= \operatorname{mean}_i \bigl|\operatorname{mant}(\tilde v_i) - \operatorname{mant}(v_i)\bigr|, &
-  f_{\text{med}} &= \operatorname{median}_i \bigl|\operatorname{mant}(\tilde v_i) - \operatorname{mant}(v_i)\bigr|,
+  f_{\text{idx}} &= 1 - \tfrac{1}{k}\,|\tilde I \cap I|, \\
+  f_{\exp} &= \textstyle\sum_{i} \mathbb{1}[\operatorname{exp}(\tilde v_i) \neq \operatorname{exp}(v_i)], \\
+  f_{\text{mean}} &= \operatorname{mean}_i |\operatorname{mant}(\tilde v_i) - \operatorname{mant}(v_i)|, \\
+  f_{\text{med}} &= \operatorname{median}_i |\operatorname{mant}(\tilde v_i) - \operatorname{mant}(v_i)|.
 \end{align*}
-where $\operatorname{exp}$ and $\operatorname{mant}$ are the 8-bit exponent and 23-bit mantissa fields of the float32 representation, and $i$ runs over rank positions.
-The profile of a sequence averages over checkpoints and stacks the layers: $x \in \mathbb{R}^{4 \times 28}$, a 112-dimensional vector.
+Here $\operatorname{exp}$ and $\operatorname{mant}$ are the exponent and mantissa fields of the float32 value, and $i$ runs over rank.
+Averaging over the eight checkpoints gives a profile $x \in \mathbb{R}^{4 \times 28}$.
+Its last row is what TOPLOC already uses.
 
-\paragraph{Matched and shared text.}
-A tampered model generates different text from the reference.
-In the \emph{matched} configuration, both models prefill the tampered model's own output, which is what a validator would see in deployment.
-In the \emph{shared} configuration, both prefill the reference model's output for the same prompt, so any difference comes from the weights and not from the tokens.
+\subsection{Classifier and decision rule}
+\label{sec:classifier}
 
-\subsection{Classifier and evaluation protocol}
-\label{sec:method-clf}
+We train a multinomial logistic regression with balanced class weights on profiles labelled clean or with one of four modifications, with features standardised on the training data.
+A linear model is easy to inspect and needs only a few hundred examples per class.
+The predicted class gives attribution.
+For the binary verdict we accept a sequence when $P(\text{clean}) \ge \tau$.
+The threshold $\tau$ is chosen on training prompts only: we compute out-of-fold $P(\text{clean})$ for honest training sequences by prompt-grouped cross-validation and set $\tau$ at their 1st percentile, a target FRR of 1\%.
+Test prompts are never used to choose $\tau$.
 
-We fixed the following choices before running the experiment.
-The primary model is multinomial logistic regression with balanced class weights (seed 20260923); $k$-nearest neighbours ($k{=}5$, uniform weights) is a secondary baseline.
-Features are $z$-scored with statistics from the training fold only.
-Evaluation uses 5-fold \texttt{GroupKFold} grouped by prompt, so no prompt appears in both training and test data under any class.
-We report balanced accuracy, per-class F1 and confusion matrices from out-of-fold predictions.
+\subsection{Verification protocol}
+\label{sec:protocol}
 
-For binary detection we score each sequence by $1 - P(\text{clean})$ from the out-of-fold five-class model and report ROC curves and the true-positive rate at 1\% FPR, computed over all honest sequences.
+\Cref{tab:protocol} separates what we implemented from what a deployment would need.
+TOPLOC's last-layer commitment, the validator's recomputation, the classifier and the staking contract are implemented; a per-layer commitment is not integrated into the protocol, and its cost is measured separately (\cref{sec:res-cost}).
+In our main experiments the provider side is also a prefill, which isolates the effect of the weights; \cref{sec:res-decode} repeats them with decode-time activations, which is what a provider would commit to.
 
-Two treatments of the honest class are reported.
-In the \emph{pooled} treatment, which we fixed before the run, each prompt's three honest profiles (one per perturbation axis) are averaged into one clean vector, giving 200 vectors per class.
-In the \emph{separate} treatment, each honest axis contributes its own 200 vectors (600 honest, 800 tampered).
-A deployed validator sees one honest configuration per request, so we treat the separate treatment as the main result.
+The contract (142 lines of Solidity) stores each provider's model hash, stake and history of tamper classes, and each proof's prompt hash, proof hash and timestamp.
+A challenger posts a bond within two hours of a proof, and only the validator can resolve it.
+If upheld, the stake is split between challenger and validator, the bond is returned and the class is recorded (0 clean, 1 8-bit, 2 4-bit, 3 LoRA, 4 fine-tune, 255 unattributed); otherwise the validator keeps the bond.
+For a sampling rate $p$, stake $S$ and a saving $\Delta$ per request from tampering, a risk-neutral provider facing certain detection on sampled requests is deterred when $\Delta < pS$.
+The system is not trustless: its verdicts are as trustworthy as the validator.
 
-\subsection{Enforcement contract}
-\label{sec:enforce}
-
-The \texttt{ProofOfWeights} contract (Solidity, 142 lines) stores, per provider, a model hash, a stake in an ERC-20 token, a slashed flag and a list of \texttt{uint8} tamper classes; and, per proof, a prompt hash, a proof hash, an off-chain blob URI and a timestamp.
-Anyone may challenge a proof within a two-hour window by posting a bond.
-Only the validator address may call \texttt{resolveChallenge(id, upheld, class)}.
-An upheld challenge sets the stake to zero, pays half to the challenger and half to the validator, refunds the bond and appends the class; a rejected challenge forfeits the bond to the validator.
-Class identifiers are 0 clean, 1 8-bit, 2 4-bit, 3 LoRA, 4 full fine-tune, and 255 for an unattributed binary verdict.
-Seven Foundry tests cover honest providers, typed and binary slashes, false challenges, the dispute window, double slashing and validator-only resolution.
-
-\paragraph{Stake bound.}
-If a validator samples a fraction $p$ of proofs and an upheld challenge slashes stake $S$, a provider that saves $\Delta$ per request by tampering is deterred when $\Delta < p\,S$ (one proof per epoch).
-We measure $\Delta$ as the difference in GPU time per request, converted at the on-demand hourly price of the instance.
+\begin{table*}[!t]
+\centering
+\small
+\caption{Protocol steps, what each relies on, and what we implemented.}
+\label{tab:protocol}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}p{0.16\textwidth}@{}}
+\toprule
+Step & Mechanism & Relies on & Status \\
+\midrule
+Provider commits to activations & TOPLOC polynomial commitment, last layer & cryptographic binding of the proof to its hash & implemented \\
+ & per-layer commitment (28 proofs) & same & measured separately, not integrated \\
+Commitment bound to the served text & validator recomputes on the served tokens & validator honesty & implemented \\
+Commitment bound to the model that generated the text & none & --- & not provided (\cref{sec:security}) \\
+Verdict & last-layer thresholds; per-layer classifier & statistical separation, validator honesty & implemented \\
+Authorised kernel & declaration or enforcement & not specified & proposed \\
+Penalty & stake, bond, dispute window & smart contract; single trusted validator & implemented (local chain) \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
 %=====================================================================
 \section{Experimental setup}
 \label{sec:setup}
 
-\paragraph{Model and data.}
-We use Qwen2.5-1.5B-Instruct~\cite{qwen2025qwen25} (revision \texttt{989aa79}, 28 layers, hidden size 1536) in bf16.
-Evaluation prompts are 200 long-answer prompts sampled from UltraChat-200k~\cite{ding2023ultrachat}.
-Each generation is greedy, 256 new tokens long, with EOS suppressed so that every sequence has eight checkpoints; the natural EOS position is stored.
-In a 20-prompt length probe without suppression, 19 prompts ran to the 256-token cap.
-Fine-tuning data is a 2{,}400-row slice of Alpaca~\cite{taori2023alpaca}, disjoint from the evaluation prompts.
+\Cref{tab:setup} lists the setup and \cref{tab:controls} the controls.
+Each prompt gets a greedy 256-token answer with the end-of-sequence token suppressed, so every sequence has eight checkpoints; in a 20-prompt probe without suppression, 19 answers ran to 256 tokens anyway.
+The two trained modifications see 2{,}400 Alpaca~\cite{taori2023alpaca} examples, with effective batch 8 and sequence length 512.
 
-\begin{table}[t]
+\begin{table}[!htb]
 \centering
 \small
-\caption{Tampered variants of the committed model. All four produce coherent text on a fixed sanity prompt.}
-\label{tab:variants}
-\begin{tabular}{@{}clll@{}}
+\caption{Setup of the main experiments.}
+\label{tab:setup}
+\begin{tabular}{@{}ll@{}}
 \toprule
-Class & Variant & Construction & Weights changed \\
-\midrule
-1 & 8-bit     & bitsandbytes LLM.int8()~\cite{dettmers2022llmint8}, outlier threshold 6.0 & all linear layers, quantised \\
-2 & 4-bit     & bitsandbytes NF4~\cite{dettmers2023qlora}, bf16 compute, no double quant. & all linear layers, quantised \\
-3 & LoRA      & $r{=}16$, $\alpha{=}32$, Q/K/V, lr $2{\times}10^{-4}$, 300 steps, merged~\cite{hu2022lora} & attention Q/K/V \\
-4 & Fine-tune & full SFT, lr $10^{-5}$, 8-bit AdamW, 300 steps & all \\
+Model & Qwen2.5-1.5B-Instruct~\cite{qwen2025qwen25}, rev.\ \texttt{989aa79} \\
+Shape & 28 layers, hidden size 1536, bf16 \\
+Hardware & NVIDIA A10G (24\,GB) \\
+Software & PyTorch 2.11, CUDA 12.8, transformers 5.17, \\
+ & \texttt{toploc} 0.1.6, TF32 off \\
+Prompts & 200 from UltraChat-200k~\cite{ding2023ultrachat} \\
+Answers & greedy, 256 tokens, 8 checkpoints \\
+Reference & SDPA attention, batch 1 \\
+Honest & eager; batch 4; batch 4 + 17 padding \\
+Tampered & 4 models (\cref{tab:variants}) \\
+Splits & 5-fold CV grouped by prompt, or a \\
+ & train/test split by prompt id (stated per table) \\
+Threshold & 1\% FRR on training prompts only \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Tampered variants.}
-\Cref{tab:variants} lists the four variants.
-Both trained variants use 300 optimiser steps with micro-batch 1, gradient accumulation 8, maximum length 512, and gradient checkpointing; each sees the same 2{,}400 Alpaca rows, in a different order (seeds 202609231 and 202609232).
-TF32 is disabled throughout.
+\begin{table*}[!t]
+\centering
+\small
+\caption{Tampered models. All four write coherent text on a sanity prompt.}
+\label{tab:variants}
+\begin{tabular}{@{}cll@{}}
+\toprule
+Class & Variant & Construction \\
+\midrule
+1 & 8-bit     & bitsandbytes LLM.int8()~\cite{dettmers2022llmint8}, outlier threshold 6.0 \\
+2 & 4-bit     & bitsandbytes NF4~\cite{dettmers2023qlora}, bf16 compute \\
+3 & LoRA      & $r{=}16$, $\alpha{=}32$ on Q/K/V, lr $2{\times}10^{-4}$, 300 steps, merged~\cite{hu2022lora} \\
+4 & Fine-tune & all weights, lr $10^{-5}$, 8-bit AdamW, 300 steps \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
-\paragraph{Honest perturbation axes.}
-The reference run uses SDPA attention at batch size 1.
-Honest traffic is the reference weights under one of three changes: \emph{eager} attention at batch 1; SDPA at batch 4; and SDPA at batch 4 with 17 extra padding tokens.
-
-\paragraph{Hardware.}
-All main experiments run on one NVIDIA A10G (24\,GB, AWS \texttt{g5.xlarge}) with PyTorch 2.11 and CUDA 12.8.
-A cross-hardware check uses an NVIDIA L4 (compute capability 8.9, \texttt{g6.xlarge}).
+\begin{table}[!htb]
+\centering
+\small
+\caption{Controls and the confound each addresses.}
+\label{tab:controls}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.42\linewidth}>{\raggedright\arraybackslash}p{0.5\linewidth}@{}}
+\toprule
+Control & Confound \\
+\midrule
+Grouped by prompt & same prompt in train and test \\
+Shared text & classifier learns the text, not the weights \\
+Pre-EOS checkpoints & effect of suppressing end of sequence \\
+Decode-time activations & prefill on both sides is unrealistic \\
+Layer, feature, checkpoint, $k$ ablations & where the signal comes from \\
+Held-out modification & closed-set accuracy mistaken for integrity \\
+Held-out honest kernel & classifier only knows seen kernels \\
+Kernel attack & provider exploits authorised variation \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 %=====================================================================
 \section{Results}
 \label{sec:results}
 
-\subsection{The last-hidden check misses quantisation and half of fine-tuning}
-\label{sec:res-lasthidden}
+\subsection{The last-layer check under honest kernel noise}
+\label{sec:res-baseline}
 
-Calibrated on prompts 0--99, the thresholds are $T_{\exp}{=}46.02$, $T_{\text{mean}}{=}25.80$, $T_{\text{median}}{=}20.0$, and the realised FPR on prompts 100--199 is 2\%.
-The published thresholds $\{38,10,8\}$ give a 23\% FPR on the same held-out prompts, so we do not use them.
-\Cref{tab:lasthidden} shows detection on all 200 prompts: neither quantised variant is ever flagged, and the two fine-tuned variants are flagged on just over half of the prompts.
-Every variant falls short of the 95\% detection rate we set in advance as the reproduction criterion.
+\Cref{tab:recal} shows the check with three sets of thresholds.
+Calibrated on all three honest configurations, it keeps a 2\% FPR on held-out prompts but flags no quantised sequence and only 55--60\% of fine-tuned ones.
+The published thresholds reject 23\% of honest prompts.
+Calibrating without eager traffic gives much tighter thresholds, which flag every tampered sequence but reject all 200 eager prompts and 4\% of the remaining honest traffic.
+A second calibration run reproduced the first row exactly.
 
-\begin{table}[t]
+\begin{table*}[!t]
 \centering
 \small
-\caption{Last-hidden-state check with calibrated thresholds (2\% held-out FPR), 200 prompts per variant. Statistics are medians over sequences of the per-sequence maximum over eight proofs.}
-\label{tab:lasthidden}
-\begin{tabular}{@{}lcccc@{}}
+\caption{TOPLOC's last-layer check under three sets of thresholds $(T_{\exp}, T_{\text{mean}}, T_{\text{median}})$. FPR is on held-out prompts of the calibration configurations; the other columns cover all 200 prompts.}
+\label{tab:recal}
+\begin{tabular}{@{}lcccccc@{}}
 \toprule
-Variant & Detected & Exp.\ mismatches & Mantissa mean & Mantissa median \\
+ & & & \multicolumn{4}{c}{Detection (\%) \up} \\
+\cmidrule(l){4-7}
+Calibrated on & FPR (\%) \down & Eager rejected (\%) \down & 8-bit & 4-bit & LoRA & Fine-tune \\
 \midrule
-8-bit     & 0.0\%  & 9.0  & 3.30  & 3.0  \\
-4-bit     & 0.0\%  & 20.0 & 9.74  & 8.0  \\
-LoRA      & 59.5\% & 43.5 & 24.93 & 21.0 \\
-Fine-tune & 54.5\% & 41.0 & 23.69 & 19.5 \\
-\midrule
-Threshold & --- & 46.02 & 25.80 & 20.0 \\
+All three configs $(46.02, 25.80, 20.0)$ & \best{2}  & \best{6}  & 0   & 0   & 59.5 & 54.5 \\
+Batch-shape only $(7.01, 1.80, 1.0)$    & 4         & 100       & \best{100} & \best{100} & \best{100} & \best{100} \\
+Published $(38, 10, 8)$                 & 23        & 69        & 0   & 50  & \best{100} & \best{100} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-\paragraph{Diagnosis.}
-The thresholds are set by the noisiest honest axis.
-\Cref{tab:noise} shows that the eager attention kernel produces exponent disagreements roughly six times larger than a change of batch shape, and larger than those of the 8-bit and 4-bit variants.
-Because calibration pools the three axes, the 99th percentile covers the eager tail, and any tamper whose last-layer footprint is smaller than eager-kernel noise cannot be detected by a threshold on these statistics.
-Thresholds calibrated without the eager axis would be tighter, but they would also reject honest providers who use a different attention kernel.
-We did not re-run the check with such thresholds and do not report a number for them.
+\Cref{tab:noise} explains why.
+On all three statistics, eager attention moves the last layer further than 4-bit quantisation does, and 8-bit quantisation falls between batch-size noise and eager noise.
+These results do not contradict TOPLOC's.
+Our batch-size noise falls inside the range TOPLOC reports, and the published thresholds raise no false alarms on it.
+Eager attention is the outlier: its mantissa statistics are more than twice the largest TOPLOC reports.
+Our model is also smaller; with a hidden size of 1536, the 128 recorded entries cover 8.3\% of the hidden state, against at most 3.6\% for the models TOPLOC tested.
 
-\begin{table}[t]
+\begin{table*}[!t]
 \centering
 \small
-\caption{Honest noise on the last-hidden statistics, by perturbation axis (mean over 200 prompts of the per-sequence maximum). The eager kernel is the dominant source of honest disagreement.}
+\caption{Last-layer statistics for honest configurations and tampered models, as the mean over 200 prompts of each sequence's maximum. TOPLOC's range spans the maxima in its Table~2~\cite{ong2025toploc}.}
 \label{tab:noise}
-\begin{tabular}{@{}lcc@{}}
+\begin{tabular}{@{}llccc@{}}
 \toprule
-Honest axis & Exp.\ mismatches & Mantissa mean \\
+ & Source & Exponent mismatches & Mantissa mean & Mantissa median \\
 \midrule
-Eager attention, batch 1        & 25.55 & 14.22 \\
-SDPA, batch 4                   & 4.35  & 1.35  \\
-SDPA, batch 4, +17 padding      & 4.31  & 1.37  \\
+\multirow{3}{*}{Honest}   & Eager attention      & \best{25.55} & \best{14.22} & \best{10.64} \\
+                          & Batch 4              & 4.35  & 1.35  & 1.00  \\
+                          & Batch 4 + 17 padding & 4.30  & 1.37  & 1.02  \\
+\midrule
+\multirow{4}{*}{Tampered} & 8-bit                & 8.88  & 3.47  & 2.71  \\
+                          & 4-bit                & 21.67 & 10.59 & 8.59  \\
+                          & LoRA                 & 43.19 & 25.70 & 22.72 \\
+                          & Fine-tune            & 41.05 & 24.05 & 20.46 \\
+\midrule
+\multicolumn{2}{@{}l}{TOPLOC honest range}       & 12--28 & 3.15--6.30 & 2--4 \\
+\multicolumn{2}{@{}l}{Published thresholds}      & 38     & 10         & 8    \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{table*}
 
-\subsection{Per-layer profiles attribute the modification}
-\label{sec:res-attrib}
+\subsection{Attribution with the per-layer profile}
+\label{sec:res-profile}
 
-\Cref{fig:profiles} shows mean per-layer disagreement by source.
-The two batch-shape axes stay near zero at every layer.
-Eager attention is large in early layers and decays with depth.
-8-bit quantisation is small and flat; 4-bit is larger and roughly flat.
-The two trained variants start near zero, grow with depth, and spike at the final layer.
-Each source therefore has a distinct shape, and the eager kernel, which is indistinguishable from quantisation at the last layer, differs from it in the early layers.
+With the full profile, the classifier accepts both kernels and still separates the known modifications.
+\Cref{tab:confusion} gives the out-of-fold result on matched text, with each honest configuration as a separate example.
+Balanced accuracy is 99.3\%; the 95\% $t$-interval across the five folds is 98.7--99.9\%.
+This interval reflects variation between prompt folds within one model, GPU and software stack, not variation between deployments.
+Per-class precision and recall are at least 0.96 for every class (\cref{tab:perclass}).
+Most errors fall on honest eager traffic: 13 of 200 prompts (6.5\%) are labelled as quantised.
+\Cref{tab:configs} lists other settings; the pooled one we fixed before the experiment averages each prompt's three honest profiles and scores 99.5\%, but averaging hides the eager errors.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/profiles.pdf}
-\caption{Mean per-layer disagreement with the reference prefill on matched text (200 prompts, eight checkpoints). Grey: honest axes. Colour: tampered variants. Exponent mismatch and median mantissa difference show the same pattern.}
-\label{fig:profiles}
-\end{figure}
-
-\begin{table}[t]
+\begin{table*}[!t]
 \centering
 \small
-\caption{Five-class attribution, logistic regression, 5-fold prompt-grouped cross-validation, out-of-fold predictions. Rows: true source. Columns: predicted class. Separate honest axes, matched text. Balanced accuracy 99.3\%.}
+\caption{Out-of-fold confusion matrix of the per-layer classifier on matched text, prefill on both sides. Rows are the true source; columns are the predicted class.}
 \label{tab:confusion}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
  & Clean & 8-bit & 4-bit & LoRA & Fine-tune \\
 \midrule
-Honest: eager attention   & \textbf{187} & 8 & 5 & 0 & 0 \\
-Honest: batch 4           & \textbf{199} & 0 & 0 & 0 & 1 \\
-Honest: batch 4 + padding & \textbf{199} & 0 & 0 & 0 & 1 \\
-8-bit                     & 1 & \textbf{199} & 0 & 0 & 0 \\
-4-bit                     & 0 & 0 & \textbf{200} & 0 & 0 \\
-LoRA                      & 0 & 0 & 1 & \textbf{199} & 0 \\
-Fine-tune                 & 0 & 0 & 0 & 0 & \textbf{200} \\
+Honest: eager attention   & \best{187} & 8 & 5 & 0 & 0 \\
+Honest: batch 4           & \best{199} & 0 & 0 & 0 & 1 \\
+Honest: batch 4 + padding & \best{199} & 0 & 0 & 0 & 1 \\
+8-bit                     & 1 & \best{199} & 0 & 0 & 0 \\
+4-bit                     & 0 & 0 & \best{200} & 0 & 0 \\
+LoRA                      & 0 & 0 & 1 & \best{199} & 0 \\
+Fine-tune                 & 0 & 0 & 0 & 0 & \best{200} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[!htb]
+\centering
+\small
+\caption{Per-class precision and recall, same predictions as \cref{tab:confusion}.}
+\label{tab:perclass}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Class & Precision \up & Recall \up & Support \\
+\midrule
+Clean     & 0.998 & 0.975 & 600 \\
+8-bit     & 0.961 & 0.995 & 200 \\
+4-bit     & 0.971 & 1.000 & 200 \\
+LoRA      & 1.000 & 0.995 & 200 \\
+Fine-tune & 0.990 & 1.000 & 200 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\Cref{tab:confusion} gives the out-of-fold confusion matrix with honest axes kept separate.
-Balanced accuracy is 99.3\%.
-All 200 fine-tuned sequences are attributed correctly, and only one tampered sequence (8-bit) is called clean.
-The errors are concentrated in honest eager-attention traffic: 13 of 200 prompts (6.5\%) are labelled as 8-bit or 4-bit, which is consistent with the profile overlap in \cref{fig:profiles}.
-The two batch-shape axes have a 0.5\% FPR each.
+\begin{table*}[!t]
+\centering
+\small
+\caption{Five-class balanced accuracy (\%) by setting, with the 95\% interval across the five folds. Separate: one honest example per configuration (main setting). Pooled: the three honest configurations averaged per prompt, as fixed before the experiment.}
+\label{tab:configs}
+\begin{tabular}{@{}llccc@{}}
+\toprule
+Text & Checkpoints & LR, separate \up & LR, pooled \up & $k$-NN, pooled \up \\
+\midrule
+Matched & all eight & \best{99.3} {\scriptsize(98.7--99.9)} & 99.5 {\scriptsize(99.1--99.9)} & 98.8 \\
+Matched & pre-EOS   & ---  & 98.8 {\scriptsize(97.4--100)} & 96.7 \\
+Shared  & all eight & 99.1 {\scriptsize(98.5--99.6)} & 99.8 {\scriptsize(99.5--100)} & 98.3 \\
+Shared  & pre-EOS   & ---  & 98.8 {\scriptsize(97.4--100)} & 97.3 \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
-The pooled treatment that we fixed before the run gives 99.5\% (95\% CI over folds 99.1--99.9\%), with 2 of 200 clean vectors misclassified and all 200 fine-tuned sequences correct; $k$-NN gives 98.8\%.
-Averaging the three honest axes into one vector hides the eager-kernel errors, which is why we lead with the separate treatment.
-
-\paragraph{Detection at a fixed FPR.}
-\Cref{fig:detection,fig:roc} recast the classifier as a detector.
-At 1\% FPR over all 600 honest sequences, it detects 90.0\% of 8-bit sequences and 100\% of the other three variants; AUC is 0.991 for 8-bit and 0.998 for the rest.
-This comparison with the last-hidden check is not exactly like-for-like.
-The last-hidden check compares a provider's \emph{decode} activations with the validator's prefill, which adds decode-versus-prefill noise, whereas both sides of the per-layer profile are prefills.
-The FPR budgets also differ (2\% versus 1\%).
-\Cref{sec:res-ablation} isolates the effect of depth with everything else held fixed.
-
-\begin{figure}[t]
+\begin{figure*}[!t]
 \centering
 \begin{minipage}[t]{0.49\linewidth}
   \centering
   \includegraphics[width=\linewidth]{figures/detection.pdf}
-  \caption{Detection rate by variant. Hatched: last-hidden TOPLOC check with calibrated thresholds. Solid: per-layer classifier at 1\% FPR (out-of-fold).}
+  \caption{Detection rate. Hatched: last-layer check with thresholds calibrated on all honest configurations. Solid: per-layer classifier at 1\% FPR, out of fold.}
   \label{fig:detection}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.49\linewidth}
   \centering
   \includegraphics[width=\linewidth]{figures/roc.pdf}
-  \caption{ROC of the per-layer score $1-P(\text{clean})$, honest sequences from all three axes versus each variant. Log-scaled FPR axis.}
+  \caption{ROC of the score $1-P(\text{clean})$ for all honest sequences against each known modification.}
   \label{fig:roc}
 \end{minipage}
-\end{figure}
+\end{figure*}
 
-\subsection{Depth, not the feature set, carries the signal}
+\subsection{Controls and ablations}
 \label{sec:res-ablation}
 
-\Cref{fig:ablation} retrains the same classifier on subsets of the profile, with the split, seed and honest treatment unchanged.
+A tampered model writes different text, and the classifier might learn the text.
+When both models read identical tokens (shared text) balanced accuracy is 99.1\%, and using only checkpoints before the natural end of the answer gives 98.8\% in both settings (\cref{tab:configs}).
 
-\begin{itemize}
-  \item \textbf{Layers.} The last layer alone, the information available to the original TOPLOC check, reaches 78.0\% balanced accuracy and flags 74.5\% of honest eager traffic; 27\% of 8-bit sequences are called clean. Adding every other layer raises accuracy to 99.3\%. The first 14 layers alone reach 98.6\%, the last 14 reach 91.6\%, and dropping the last layer costs only 0.4 points. The early layers are where honest kernel noise and quantisation separate (\cref{fig:profiles}).
-  \item \textbf{Features.} Mantissa statistics alone give 98.5\%; index mismatch alone and exponent mismatch alone give 93.8\% and 93.5\%.
-  \item \textbf{Checkpoints.} One checkpoint (the first 32 tokens) gives 90.9\%; two give 94.7\%; four give 97.6\%; eight give 99.3\%. Most of the gain comes from reducing honest eager-kernel false positives, from 36.0\% to 6.5\%.
-\end{itemize}
+\Cref{fig:ablation} retrains the classifier on parts of the profile.
+The last layer alone, the information TOPLOC uses, gives 78.0\%, flagging 74.5\% of eager traffic and missing 27\% of 8-bit sequences.
+The first 14 layers give 98.6\% and the last 14 only 91.6\%.
+The classifier's weights agree (\cref{fig:coef}): layers 0--4 carry 28\% of the absolute standardised coefficient mass and layer 27 another 7\%, against 3.6\% for a uniform split.
+Index overlap and mantissa median carry most of it (31\% each).
+Smaller $k$ costs accuracy: 96.2\% at $k{=}16$, 98.4\% at 32, 98.6\% at 64 and 99.3\% at 128, mainly through more eager false alarms (12.5\% at $k{=}16$ against 6.5\% at 128).
 
-\begin{figure}[t]
+\begin{figure}[!htb]
 \centering
-\includegraphics[width=0.72\linewidth]{figures/ablation.pdf}
-\caption{Ablations of the per-layer profile (matched text, separate honest axes). Bars: five-class balanced accuracy. Right column: share of honest eager-attention prompts flagged as tampered.}
+\includegraphics[width=\linewidth]{figures/ablation.pdf}
+\caption{Ablations on matched text. Bars show five-class balanced accuracy; the right column shows the share of eager-attention prompts flagged.}
 \label{fig:ablation}
 \end{figure}
 
-\subsection{The signal comes from the weights, not the text}
-\label{sec:res-text}
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth]{figures/coef.pdf}
+\caption{Share of the classifier's absolute standardised coefficients per layer, summed over classes and features.}
+\label{fig:coef}
+\end{figure}
 
-A tampered model writes different text, and a classifier could in principle key on that.
-Two controls argue against this.
-With \emph{shared} text, where both models prefill the reference output, balanced accuracy is 99.1\% (separate axes) and 99.8\% (pooled), against 99.3\% and 99.5\% on matched text.
-Restricting to checkpoints before the natural EOS position, so that no position falls in suppressed-EOS continuation, gives 98.8\% for the pooled treatment on both matched and shared text.
-\Cref{tab:configs} in the appendix lists all configurations.
+\subsection{Decode-time activations}
+\label{sec:res-decode}
 
-\subsection{Generalisation to unseen honest configurations}
-\label{sec:res-generalise}
+A real provider would commit to activations recorded while decoding.
+We repeated the experiment with the provider side taken from decoding: each tampered model's own generations and teacher-forced decoding for the honest configurations.
+We added a fourth honest configuration, the reference model decoding on the reference kernel, so that the honest class includes the decode--prefill gap.
+The validator side stays a prefill with $\theta$.
 
-The honest class in \cref{tab:confusion} includes the eager kernel at training time.
-To test robustness to an honest setup the validator has not seen, we withhold one axis from training and score it at test time (still grouped by prompt).
-Withholding either batch-shape axis is harmless: the withheld axis is flagged on 0.5\% of prompts.
-Withholding eager attention is not: all 200 eager prompts are flagged, 182 as 4-bit and 18 as 8-bit.
-The classifier learns the honest configurations it is shown and does not extrapolate from batch-shape noise to a kernel change.
-A deployment would need to enumerate the kernels it accepts, or require providers to declare their kernel so the validator can match it.
+Cross-validated balanced accuracy is 99.0\% (98.4--99.6\%), against 80.6\% for the last layer alone (\cref{tab:decode}).
+None of the reference model's own decodes is flagged; eager traffic is flagged on 12\% of prompts.
+A classifier trained only on prefill profiles also works on decode-time profiles without retraining, at 99.2\%.
 
-\paragraph{Cross-hardware.}
-We generated 50 honest sequences on an NVIDIA L4.
-The L4's own decode proofs, verified by an L4 prefill with the A10G-calibrated thresholds, were all accepted (exponent mismatches 2--9, median 5).
-Comparing L4 prefill per-layer \topk{} with the stored A10G reference on the same tokens, the A10G-trained classifier labelled all 50 as clean.
-Two caveats apply: 50 sequences is a small sample, and we did not verify A10G proofs against L4 activations, since the proof bytes were not transferred between instances.
-
-\subsection{Serving cost and the stake bound}
-\label{sec:res-cost}
-
-\Cref{tab:cost} reports serving cost on the A10G at batch size 1 with greedy decoding (three timed 256-token requests after one warm-up).
-Both quantised modes are slower than bf16: 8-bit by $4.9\times$ and 4-bit by $1.3\times$.
-The saving $\Delta$ is therefore negative ($-25.7$\,s and $-2.0$\,s per request, or $-\$0.0072$ and $-\$0.0006$ at \$1.006 per hour), and the bound $\Delta < pS$ holds for any $S \geq 0$ at sampling rates of 1\%, 5\% and 10\%.
-The quantised models do use 39--56\% less peak memory, which a provider could exploit by packing more replicas or larger batches per GPU.
-A memory-based cost model, or optimised low-bit kernels at higher batch sizes, may yield a positive $\Delta$; we did not measure these.
-Validator cost is small: one prefill takes 0.046\,s on average, 0.69\% of a bf16 generation.
-
-\begin{table}[t]
+\begin{table*}[!t]
 \centering
 \small
-\caption{Serving cost on an NVIDIA A10G, batch size 1, 256 new tokens, mean of three requests.}
-\label{tab:cost}
+\caption{Per-layer classifier with the provider's activations recorded during decoding, 200 prompts per source. Out of fold except in the last row.}
+\label{tab:decode}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
-Mode & Tokens/s & Seconds/request & Prefill (s) & Peak memory (MiB) & $\Delta$ vs bf16 (s) \\
+ & Balanced & \multicolumn{2}{c}{Honest flagged (\%) \down} & \multicolumn{2}{c}{Detected at 1\% FPR (\%) \up} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-6}
+Training data & accuracy (\%) \up & Ref.\ decode & Eager & 8-bit & 4-bit / LoRA / FT \\
 \midrule
-bf16  & 38.4 & 6.66  & 0.046 & 3183 & --- \\
-8-bit & 7.9  & 32.34 & 0.161 & 1936 & $-25.7$ \\
-4-bit & 29.6 & 8.66  & 0.052 & 1387 & $-2.0$ \\
+Decode, all layers               & \best{99.0} {\scriptsize(98.4--99.6)} & 0 & 12 & 85 & 100 \\
+Decode, last layer only          & 80.6 {\scriptsize(79.7--81.5)} & 0 & 90 & --- & --- \\
+Prefill only (no retraining)     & 99.2 & 0 & 3 & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Operating point}
+\label{sec:res-op}
+
+Balanced accuracy averages over classes and decision rules; a verifier needs FAR and FRR at one threshold.
+\Cref{tab:op} trains on prompts 0--99, chooses $\tau$ on those prompts only, and tests on prompts 100--199.
+Intervals are Wilson 95\% intervals with the sequence as the sampling unit.
+At the 1\% FRR target the verifier rejects 0.7\% of honest prefill sequences but accepts 47\% of 8-bit sequences; 4-bit, LoRA and fine-tune are never accepted.
+On decode-time data the 8-bit FAR falls to 22\% at an FRR of 1.8\%.
+Taking the most likely class instead of thresholding $P(\text{clean})$ accepts no 8-bit prefill sequence but rejects 4.3\% of honest ones.
+8-bit quantisation is the binding case: its profile is the one closest to honest eager traffic, so any operating point trades 8-bit acceptance against eager rejection.
+$P(\text{clean})$ is reasonably calibrated on the test split (expected calibration error 0.021, Brier score 0.015).
+
+\begin{table*}[!t]
+\centering
+\small
+\caption{Verdicts at a fixed threshold. Train prompts 0--99, test prompts 100--199 (100 per source); $\tau$ set for 1\% FRR on training prompts. FRR: honest sequences rejected. FAR: tampered sequences accepted. Brackets: Wilson 95\% intervals.}
+\label{tab:op}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & FRR (\%) \down & \multicolumn{4}{c}{FAR (\%) \down} \\
+\cmidrule(l){3-6}
+Provider activations & all honest & 8-bit & 4-bit & LoRA & Fine-tune \\
+\midrule
+Prefill, threshold   & 0.7 \ci{0.2}{2.4} & 47 \ci{37.5}{56.7} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} \\
+Prefill, most likely class & 4.3 \ci{2.5}{7.3} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} \\
+Decode, threshold    & 1.8 \ci{0.9}{3.6} & 22 \ci{15.0}{31.1} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} \\
+Decode, most likely class & 3.2 \ci{1.9}{5.5} & 3 \ci{1.0}{8.5} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} & 0 \ci{0}{3.7} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Unknown modifications}
+\label{sec:res-open}
+
+A verifier must reject modifications it was never trained on.
+We left each known modification out of training in turn and tested whether it is accepted as clean (\cref{tab:open}).
+Held-out 4-bit, LoRA and fine-tuned sequences are still rejected, with at most 1 of 100 accepted; the classifier simply gives them a neighbouring label.
+Held-out 8-bit quantisation is accepted on all 100 test prompts, with prefill or decode-time data.
+The classifier separates 8-bit from clean only because it has seen 8-bit; it does not learn a general notion of ``not $\theta$''.
+
+We also served six modifications that never appeared in training (\cref{tab:newmods}): the LoRA model loaded with 4-bit weights, and 4-bit quantisation of only some layers (the first 14, the last 14, even layers, odd layers, or only the MLPs).
+These share 4-bit quantisation with a training class, so they test variation around a known modification rather than an unrelated one.
+With the detector restricted to SDPA traffic, none of the 300 test sequences was accepted.
+The detector that also accepts eager traffic accepted 4 of 50 sequences quantised in the first 14 layers.
+The mixed-kernel last-layer check caught 66\% of the LoRA model but at most 2\% of the partial quantisations.
+
+\begin{table*}[!t]
+\centering
+\small
+\caption{Modifications never seen in training, test prompts 150--199 (50 sequences each), decode-time activations, threshold rule. Detectors trained on prompts 0--149. Brackets: Wilson 95\% intervals.}
+\label{tab:newmods}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & Share of linear & \multicolumn{2}{c}{Per-layer FAR (\%) \down} & \multicolumn{3}{c}{Last-layer detected (\%) \up} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-7}
+Modification & params in 4-bit & Unrestricted & SDPA only & All configs & Batch-shape only & Published \\
+\midrule
+LoRA + 4-bit          & 100\% & 0 \ci{0}{7.1} & 0 \ci{0}{7.1} & 66 & 100 & 100 \\
+4-bit, layers 0--13   & 50\%  & 8 \ci{3.2}{18.8} & 0 \ci{0}{7.1} & 0 & 100 & 26 \\
+4-bit, layers 14--27  & 50\%  & 0 \ci{0}{7.1} & 0 \ci{0}{7.1} & 0 & 100 & 16 \\
+4-bit, even layers    & 50\%  & 0 \ci{0}{7.1} & 0 \ci{0}{7.1} & 0 & 100 & 10 \\
+4-bit, odd layers     & 50\%  & 0 \ci{0}{7.1} & 0 \ci{0}{7.1} & 2 & 100 & 12 \\
+4-bit, MLPs only      & 88\%  & 0 \ci{0}{7.1} & 0 \ci{0}{7.1} & 2 & 100 & 40 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[!htb]
+\centering
+\small
+\caption{Held-out modification accepted as clean (FAR, \%), threshold rule, test prompts 100--199, 100 sequences each, with Wilson 95\% intervals. FRR on honest test traffic was 0.5--1.8\%.}
+\label{tab:open}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Held out & Prefill & Decode \\
+\midrule
+8-bit     & 100 \ci{96.3}{100} & 100 \ci{96.3}{100} \\
+4-bit     & 1 \ci{0.2}{5.4}    & 1 \ci{0.2}{5.4} \\
+LoRA      & 0 \ci{0}{3.7}      & 0 \ci{0}{3.7} \\
+Fine-tune & 0 \ci{0}{3.7}      & 0 \ci{0}{3.7} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{End-to-end slash}
-\label{sec:res-slash}
+\subsection{Configuration-adaptive provider (A2)}
+\label{sec:res-attack}
 
-We deployed the contract on a local Anvil chain (chain id 31337) with a mock ERC-20 stake of 100 tokens.
-A provider served the full fine-tune for prompt 3 and submitted its last-hidden proofs.
-The validator's check measured 57 exponent mismatches against the threshold of 46.02 and flagged the sequence; the per-layer classifier labelled it class 4 (fine-tune); the validator upheld the challenge.
-The provider's stake dropped to zero and its on-chain tamper history became \texttt{[4]}.
-This is a single demonstration on a prompt that the last-hidden check happens to catch; over 200 prompts that check catches the same variant 54.5\% of the time.
-Per-layer feature extraction on the live path matches the offline path exactly (maximum absolute difference 0 on 10 sequences), because both call the same function.
+Because eager traffic counts as honest, a provider can tamper with the weights and serve the result with eager attention.
+We replayed each tampered model's own generations by decoding, with eager attention at batch 1 and with SDPA at batch 4, on prompts 100--199.
+
+\Cref{tab:attack} uses a classifier trained on decode-time data from prompts 0--99 without attack examples, taking the most likely class.
+Eager attention hides the quantisation: 77\% of 8-bit and 66\% of 4-bit sequences are called clean, and LoRA and fine-tuned sequences, though still flagged on 71--78\% of prompts, usually get the wrong label.
+The last-layer check with mixed-kernel thresholds catches only 12\% of eager-served 8-bit.
+Batch 4 does not help the attacker; 96--100\% of those sequences are caught and correctly named.
+
+\begin{table*}[!t]
+\centering
+\small
+\caption{Tampered models served with a non-reference kernel, 100 held-out prompts each. Per-layer: most likely class from a classifier trained on decode-time data from prompts 0--99 without attack examples. Last-layer: the thresholds of \cref{tab:recal}.}
+\label{tab:attack}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+ & & \multicolumn{2}{c}{Per-layer (\%)} & \multicolumn{3}{c}{Last-layer detected (\%) \up} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-7}
+Kernel & Variant & Detected \up & Called clean \down & All configs & Batch-shape only & Published \\
+\midrule
+\multirow{4}{*}{Eager, batch 1} & 8-bit     & 23 & 77 & 12 & 100 & 77  \\
+                                & 4-bit     & 34 & 66 & 64 & 100 & 99  \\
+                                & LoRA      & 71 & 29 & 91 & 100 & 100 \\
+                                & Fine-tune & 78 & 22 & 77 & 100 & 100 \\
+\midrule
+\multirow{4}{*}{SDPA, batch 4}  & 8-bit     & \best{96}  & 4 & 0  & 100 & 1   \\
+                                & 4-bit     & \best{100} & 0 & 0  & 100 & 50  \\
+                                & LoRA      & \best{100} & 0 & 59 & 100 & 100 \\
+                                & Fine-tune & \best{100} & 0 & 57 & 100 & 100 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{Kernel policy.}
+\Cref{tab:policy} compares three policies at the threshold rule, training on prompts 0--149 and testing on 150--199 (50 sequences per cell).
+Under the \emph{unrestricted} policy, one detector accepts every authorised kernel; it accepts 92\% of eager-served 8-bit and 68\% of eager-served 4-bit.
+Under a \emph{declared} policy, each provider names its kernel and the verifier uses a detector trained for that kernel, including on eager-served tampering; the attacker declares whichever kernel is accepted more often.
+This catches eager-served 4-bit, LoRA and fine-tuning (accepted on 2--8\% of prompts) while rejecting 2\% of honest eager traffic, but it still accepts 96\% of eager-served 8-bit.
+A declaration is also only a claim: nothing in our protocol checks it.
+Under an \emph{enforced} policy, the provider must serve with SDPA; the verifier then accepts none of the 400 tampered test sequences, at the default batch or at batch 4, and rejects none of the 150 honest ones.
+With 50 sequences per cell, the 95\% upper bound on each of these zero rates is 7.1\%.
+In this experiment the validator's reference is always an SDPA prefill, since we did not record eager reference prefills.
+Adding attack examples to a single detector for all kernels instead raises eager-attack detection to 62\% for 8-bit and 98--100\% for the others, but it then flags 38\% of honest eager traffic.
+
+\begin{table*}[!t]
+\centering
+\small
+\caption{Kernel policies, threshold rule, test prompts 150--199 (50 sequences per cell). FAR on eager-served tampering; under the declared policy the attacker's better declaration is shown. Brackets: Wilson 95\% intervals.}
+\label{tab:policy}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{2}{c}{FRR (\%) \down} & \multicolumn{4}{c}{FAR on eager-served tampering (\%) \down} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-7}
+Policy & eager & SDPA configs & 8-bit & 4-bit & LoRA & Fine-tune \\
+\midrule
+Unrestricted & 4 \ci{1.1}{13.5} & 0 \ci{0}{7.1} & 92 \ci{81.2}{96.8} & 68 \ci{54.2}{79.2} & 28 \ci{17.5}{41.7} & 28 \ci{17.5}{41.7} \\
+Declared     & 2 \ci{0.4}{10.5} & 0 \ci{0}{7.1} & 96 \ci{86.5}{98.9} & 6 \ci{2.1}{16.2} & 2 \ci{0.4}{10.5} & 8 \ci{3.2}{18.8} \\
+Enforced SDPA & not allowed & 0 \ci{0}{7.1} & \multicolumn{4}{c}{not possible; SDPA-served tampering: 0 \ci{0}{7.1} for all 8 attacks} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\paragraph{Unseen honest kernels.}
+The classifier only accepts kernels it has seen.
+Left out of training, a batch-size configuration is still accepted (0.5\% flagged), but all 200 eager prompts are flagged, mostly as 4-bit.
+A small honest-only check on an NVIDIA L4 raised no false alarms on 50 sequences under either check; we did not run tampered models on the L4.
+
+\subsection{Detector-guided quantisation (A3)}
+\label{sec:res-aware}
+
+An attacker who can query the detector can choose what to quantise.
+We gave the attacker the five partial quantisations of \cref{tab:newmods}, each covering at least half of the linear parameters, and let it score them on calibration prompts 0--19 with the detector it faces, picking the one accepted most often (ties broken by mean $P(\text{clean})$).
+Against the SDPA-only detector no candidate was accepted on any calibration prompt; the search picked the last-14-layer variant, which was accepted on 0 of 50 test prompts.
+Against the detector that also accepts eager traffic, the search picked the first-14-layer variant (accepted on 1 of 20 calibration prompts), which was accepted on 4 of 50 test prompts (8\%, \ci{3.2}{18.8}).
+This is a weak attacker with five discrete choices, and it does not show robustness to an attacker that optimises the weights against the detector.
+
+
+\subsection{A second model}
+\label{sec:res-smol}
+
+We repeated the core experiment on SmolLM2-1.7B-Instruct, a Llama-architecture model from a different family (24 layers, hidden size 2048, revision \texttt{31b70e2}), with 100 prompts, 128-token answers and decode-time activations.
+Honest traffic was the reference decode, eager attention and batch 4; tampered traffic was 4-bit and 8-bit quantisation, and the eager attack used prompts 50--99.
+
+The picture differs from Qwen (\cref{tab:smol}).
+Eager attention barely changes this model: its mean index mismatch is within 0.002 of the reference decode at every layer, while 8-bit and 4-bit sit at 0.08--0.12 and 0.14--0.22 respectively across layers.
+The full profile reaches 98.7\% balanced accuracy and the last layer alone 98.4\%; no honest sequence is flagged and no tampered sequence is called clean in cross-validation.
+At the threshold rule, trained on prompts 0--49 and tested on 50--99, eager-served quantisation is never accepted, and a detector trained without eager traffic still accepts all honest eager traffic.
+On this model, then, there is no kernel loophole and no need for the full profile.
+Whether a model shows the overlap seen on Qwen has to be measured per model.
+
+\begin{table}[!htb]
+\centering
+\small
+\caption{SmolLM2-1.7B-Instruct, decode-time activations. CV: 5-fold grouped by prompt, 100 prompts. FAR and FRR: train prompts 0--49, test 50--99 (50 per cell), threshold rule, detector accepting all honest configurations.}
+\label{tab:smol}
+\begin{tabular}{@{}lc@{}}
+\toprule
+Balanced accuracy, all 24 layers (CV) & 98.7\% \\
+Balanced accuracy, last layer only (CV) & 98.4\% \\
+FRR: reference / eager / batch 4 & 0 / 0 / 2\% \\
+FAR: 4-bit / 8-bit & 0 / 0\% \\
+FAR: eager-served 4-bit / 8-bit & 0 / 0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Cost}
+\label{sec:res-cost}
+
+\paragraph{Commitment.}
+We built real TOPLOC commitments for all 28 layers of 10 reference generations (256 tokens each, $k{=}128$).
+One commitment per layer takes 2{,}064 bytes per sequence, the same as TOPLOC's last-layer commitment, so the full profile costs 57{,}792 bytes per 256 tokens, or 226 bytes per token.
+Building all 28 commitments took 0.22\,s and verifying them 0.29\,s per sequence on the instance's CPU, and capturing every layer during the validator's prefill added no measurable time to its 0.042\,s.
+We did not integrate these commitments into the contract or measure them under load.
+
+\paragraph{Serving.}
+\Cref{tab:throughput} shows decoding throughput at three batch sizes.
+At batch 1, 8-bit is $4.9\times$ and 4-bit $1.3\times$ slower than bf16, as in our earlier measurement, so the time saving $\Delta$ is negative.
+At batch 32, 4-bit reaches 96\% of bf16 throughput with 29\% less peak memory, which leaves room for more replicas or larger batches per GPU; 8-bit stays three times slower.
+Whether cheating pays therefore depends on the serving load, and the condition $\Delta < pS$ has to be evaluated at the provider's own operating point.
+
+\begin{table}[!htb]
+\centering
+\small
+\caption{Decoding throughput (tokens/s, all sequences) and peak memory on an A10G, 128 new tokens, mean of two runs after one warm-up.}
+\label{tab:throughput}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Batch & bf16 & 8-bit & 4-bit \\
+\midrule
+1  & 39.1 & 8.0   & 29.4 \\
+8  & 258.3 & 55.3 & 203.1 \\
+32 & 494.2 & 163.9 & 476.5 \\
+\midrule
+Peak MiB, batch 32 & 6209 & 6236 & 4413 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+We also ran the whole pipeline once on a local Anvil chain: a provider staked 100 mock tokens and served the fine-tuned model, the last-layer check flagged the sequence (57 exponent mismatches against 46.02), the classifier returned class 4, and the contract zeroed the stake and recorded \texttt{[4]}.
 
 %=====================================================================
-\section{Discussion and limitations}
-\label{sec:discussion}
+\section{Security analysis}
+\label{sec:security}
 
-\paragraph{What the per-layer profile adds.}
-Within a single model, GPU type and set of honest kernels, comparing \topk{} activations at every layer turns TOPLOC's binary check into a five-way attribution that also detects quantisation the last-layer check misses.
-The ablations locate the gain in the early and middle layers, where honest kernel noise and weight changes have different shapes.
+\paragraph{What the 99.3\% measures.}
+It is closed-set attribution among four modifications, in one model, on one GPU type, with prompt folds as the only source of variation.
+It does not bound the acceptance of unknown modifications, which can be complete (\cref{sec:res-open}), and the fold interval is not a deployment interval.
 
-\paragraph{What it would cost.}
-Committing to 28 layers instead of one multiplies the proof by up to 28.
-TOPLOC reports 258 bytes per 32 tokens for one layer of an 8B model; a direct extension would be several kilobytes per 32 tokens.
-We have not built such a commitment: our per-layer comparison uses teacher-forced prefills on both sides, not decode-time proofs, so its accuracy under decode-versus-prefill noise is untested.
+\paragraph{Commitments and selective disclosure.}
+A TOPLOC commitment binds activations to the tokens the validator recomputes, so a provider cannot report activations that do not match those tokens under $\theta$.
+It does not bind the tokens to the weights that chose them.
+A provider can generate with $\tilde\theta$, then run one prefill with $\theta$ on its own output and commit to those activations; both checks then pass.
+This costs one prefill per sampled response, far less than generation, and it is the same gap TOPLOC reports for speculative decoding.
+Closing it needs a binding between sampling and the committed weights, for example output-distribution tests on the served text~\cite{gao2025model} or trusted execution~\cite{cai2025auditing}.
+A provider that serves verification requests differently from ordinary ones is also outside what any per-response check can see, unless verification requests are indistinguishable from traffic.
 
-\paragraph{Limitations.}
-\begin{itemize}
-  \item \textbf{Scope.} One model (1.5B parameters), one main GPU type, four tamper variants of one strength each, 200 prompts per class. We have not tested larger models, other quantisation libraries (GPTQ, AWQ, FP8), weaker fine-tunes, or adaptive adversaries who train against the classifier.
-  \item \textbf{Honest coverage.} The classifier rejects an honest kernel it was not trained on (\cref{sec:res-generalise}), and even when trained on it, flags 6.5\% of eager-kernel traffic.
-  \item \textbf{Comparison with TOPLOC.} The last-hidden numbers come from decode-versus-prefill proofs and the per-layer numbers from prefill-versus-prefill comparisons, at different FPR budgets. The within-protocol ablation (\cref{fig:ablation}) is the controlled comparison.
-  \item \textbf{Calibration.} 99th-percentile thresholds from 300 honest sequences have wide error bars; we report realised held-out FPR rather than the target.
-  \item \textbf{Generation.} EOS is suppressed so that every sequence has eight checkpoints; pre-EOS controls are reported.
-  \item \textbf{Cost.} Timing is for bitsandbytes kernels at batch size 1 on one GPU and does not establish that quantisation is slower in general.
-  \item \textbf{Enforcement.} One trusted validator; a local chain rather than a public network; one demonstrated slash. Speculative decoding remains undetectable.
-  \item \textbf{Cross-hardware.} 50 L4 sequences, and the proof check is L4 against itself.
-\end{itemize}
+\paragraph{Kernel enforcement.}
+Enforcing the kernel closed the A2 attack in our data, but we have not shown how to enforce it.
+A declared kernel is a claim; verifying it needs either a kernel signature in the activations, which our eager results suggest exists but which an attacker could imitate, or attested execution.
+Other execution choices we did not vary, such as precision, continuous batching and tensor parallelism, could open similar gaps.
+
+\paragraph{Detector-aware attacks.}
+Our A3 attacker searches over a small, discrete set of layer subsets.
+An attacker that optimises the weights directly against a known linear detector, for example by fine-tuning with a penalty on the detector's score, is likely to do better, and we did not test it.
+
+\paragraph{Generalisation and statistics.}
+Our evidence covers two models of 1.5--1.7B parameters, one GPU type for tampering, and 50--200 prompts per source.
+The second model behaved differently from the first, so neither the kernel loophole nor the value of the full profile can be assumed for a new model.
+Wilson intervals on 50--100 sequences cannot certify rates below a few percent; a zero count out of 50 only bounds the rate below 7.1\%.
 
 %=====================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 
-Once its thresholds are set to accept realistic honest kernel variation, TOPLOC's last-hidden-state check does not detect 8-bit or 4-bit quantisation of Qwen2.5-1.5B-Instruct and detects light fine-tuning on about half of prompts.
-Comparing the same \topk{} statistics at every decoder layer detects all four modifications at 1\% FPR and identifies which one occurred, with most of the information in the early and middle layers rather than the last one.
-The profile depends on the honest configurations it is trained on and fails on an unseen attention kernel, so a deployment must fix or declare its kernels.
-Attaching the label to an optimistic slashing contract records what was detected, not only that something was.
-On our hardware, quantised serving was slower than bf16, so we cannot justify the size of the stake by a time saving; the case for a stake rests on memory savings and on fine-tuned behaviour changes, which we leave to future work.
+Honest kernel noise and weight tampering can look the same at the last layer of a language model and still differ across its depth.
+On Qwen2.5-1.5B-Instruct, a per-layer profile of TOPLOC's statistics attributes four known modifications with 99.3\% balanced accuracy while accepting two attention kernels, where the last-layer check with mixed-kernel thresholds catches no quantisation.
+The profile is not an integrity guarantee.
+It accepts an unseen 8-bit model on every test prompt, a provider that switches to eager attention passes on most quantised prompts, and neither check binds the served text to the weights that generated it.
+With the kernel enforced, no tested attack passed, including six unseen modifications and a detector-guided choice of layers, which suggests that verification protocols should fix the execution configuration rather than tolerate it.
+On SmolLM2-1.7B the overlap between kernel noise and quantisation did not occur, so the need for a per-layer profile is a property of the model, to be measured before deployment.
+A per-layer commitment is cheap to build and check, but it is 28 times larger than TOPLOC's.
+\Cref{tab:status} summarises what is established.
+
+\begin{table}[!htb]
+\centering
+\small
+\caption{Status of the paper's claims.}
+\label{tab:status}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.5\linewidth}>{\raggedright\arraybackslash}p{0.44\linewidth}@{}}
+\toprule
+Claim & Status \\
+\midrule
+Last-layer check misses quantisation under mixed-kernel thresholds & measured \\
+Per-layer attribution of 4 known modifications & measured \\
+Holds for decode-time activations & measured \\
+Rejects unknown modifications & not established (fails for 8-bit) \\
+Robust to kernel choice (A2) & not established \\
+Kernel enforcement closes A2 & measured if enforced; enforcement proposed \\
+Robust to detector-aware attacks (A3) & one discrete search: no evasion with enforced kernel; weight optimisation untested \\
+Other models and hardware & second model: attribution holds, loophole absent; tampering on other GPUs untested \\
+Per-layer commitment is practical & commitment measured; not integrated \\
+Penalty enforcement & implemented, trusted validator \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
 
 %=====================================================================
 \appendix
-\section{Additional results}
-\label{app:results}
-
-\begin{table}[h]
-\centering
-\small
-\caption{Five-class balanced accuracy (\%) for every configuration, 5-fold prompt-grouped cross-validation. Pooled: three honest axes averaged per prompt (fixed before the run). Separate: one honest vector per axis.}
-\label{tab:configs}
-\begin{tabular}{@{}llccc@{}}
-\toprule
-Text & Checkpoints & LR, pooled & $k$-NN, pooled & LR, separate \\
-\midrule
-Matched & all eight & 99.5 {\scriptsize(99.1--99.9)} & 98.8 & 99.3 \\
-Matched & pre-EOS   & 98.8 {\scriptsize(97.4--100)}  & 96.7 & --- \\
-Shared  & all eight & 99.8 {\scriptsize(99.5--100)}  & 98.3 & 99.1 \\
-Shared  & pre-EOS   & 98.8 {\scriptsize(97.4--100)}  & 97.3 & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering
-\small
-\caption{Leave-one-honest-axis-out. The withheld axis is excluded from training in every fold and scored on its test-fold prompts. Matched text; shared text gives identical counts.}
-\label{tab:loao}
-\begin{tabular}{@{}lccccccc@{}}
-\toprule
-Withheld axis & Flagged & \multicolumn{5}{c}{Predicted class counts} \\
- & & Clean & 8-bit & 4-bit & LoRA & Fine-tune \\
-\midrule
-Eager attention   & 100\% & 0   & 18 & 182 & 0 & 0 \\
-Batch 4           & 0.5\% & 199 & 0  & 0   & 0 & 1 \\
-Batch 4 + padding & 0.5\% & 199 & 0  & 0   & 0 & 1 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 \section{Reproducibility}
-\label{app:repro}
 
 \begin{itemize}
-  \item Model \texttt{Qwen/Qwen2.5-1.5B-Instruct}, revision \texttt{989aa7980e4cf806f80c7fef2b1adb7bc71aa306}; \texttt{toploc} 0.1.6; PyTorch 2.11.0 (CUDA 12.8); transformers 5.17.0; driver 595.71.05.
-  \item Seeds: prompt sampling and classifier 20260923; LoRA data order 202609231; SFT data order 202609232. Calibration prompts 0--99, validation prompts 100--199.
-  \item \topk{} recorder: forward hooks on each decoder layer output; $k{=}128$ by absolute value; positions $|\text{prompt}|+32c$. The live validator and the offline tables call the same feature function.
-  \item Contract: Solidity 0.8.24, Foundry; deployment address, transaction hash and the recorded proof bytes are in the released result files.
-  \item The original run's choices (thresholds, gate criteria, classifier settings, pooled clean class, class identifiers) were written down before the corresponding experiments. The separate-axis, leave-one-axis-out, ablation and ROC analyses were added afterwards, on the same stored activations, and are computed by a single CPU script.
+  \item Code and data: \url{https://github.com/bruce249/proof-of-weights}.
+  \item Model revision:\\ {\footnotesize\texttt{989aa7980e4cf806f80c7fef2b1adb7bc71aa306}}.
+  \item \texttt{toploc} 0.1.6, PyTorch 2.11.0, transformers 5.17.0.
+  \item Seeds: prompts and classifier 20260923, LoRA 202609231, fine-tune 202609232.
+  \item Main tables: \texttt{paper/analysis.py}, \texttt{paper/decode\_analysis.py}, \texttt{paper/review\_analysis.py}, \texttt{paper/review\_gpu\_analysis.py}; GPU runs: \texttt{inference/task02.py}, \texttt{task04.py}, \texttt{recalibrate.py}, \texttt{kernel\_attack.py}, \texttt{review\_gpu.py}.
+  \item Proofs are built from CPU copies of the activations, because the library failed on CUDA tensors in our environment.
+  \item The thresholds, classifier settings and pooled clean class were fixed before the experiments. All other analyses, including every result in \cref{sec:res-op,sec:res-open,sec:res-attack}, were added afterwards and are exploratory.
 \end{itemize}
 
 \end{document}

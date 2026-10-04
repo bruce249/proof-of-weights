@@ -1,0 +1,49 @@
+[09:54:05] quant_8bit eager_b1 [100] exp=38
+[10:05:43] quant_8bit eager_b1 [120] exp=15
+[10:17:23] quant_8bit eager_b1 [140] exp=37
+[10:29:02] quant_8bit eager_b1 [160] exp=23
+[10:40:45] quant_8bit eager_b1 [180] exp=40
+[10:51:54] wrote quant_8bit_eager_b1
+[10:52:33] quant_8bit sdpa_b4 [100] exp=7
+[10:55:46] quant_8bit sdpa_b4 [120] exp=6
+[10:58:59] quant_8bit sdpa_b4 [140] exp=6
+[11:02:11] quant_8bit sdpa_b4 [160] exp=14
+[11:05:24] quant_8bit sdpa_b4 [180] exp=10
+[11:08:00] wrote quant_8bit_sdpa_b4
+[11:08:12] quant_4bit eager_b1 [100] exp=44
+[11:11:45] quant_4bit eager_b1 [120] exp=37
+[11:15:18] quant_4bit eager_b1 [140] exp=58
+[11:18:49] quant_4bit eager_b1 [160] exp=42
+[11:22:21] quant_4bit eager_b1 [180] exp=67
+[11:25:44] wrote quant_4bit_eager_b1
+[11:25:54] quant_4bit sdpa_b4 [100] exp=27
+[11:26:48] quant_4bit sdpa_b4 [120] exp=11
+[11:27:41] quant_4bit sdpa_b4 [140] exp=18
+[11:28:34] quant_4bit sdpa_b4 [160] exp=28
+[11:29:27] quant_4bit sdpa_b4 [180] exp=26
+[11:30:13] wrote quant_4bit_sdpa_b4
+[11:30:45] lora_merged eager_b1 [100] exp=46
+[11:33:31] lora_merged eager_b1 [120] exp=45
+[11:36:17] lora_merged eager_b1 [140] exp=48
+[11:39:02] lora_merged eager_b1 [160] exp=65
+[11:41:47] lora_merged eager_b1 [180] exp=68
+[11:44:27] wrote lora_merged_eager_b1
+[11:44:35] lora_merged sdpa_b4 [100] exp=46
+[11:45:16] lora_merged sdpa_b4 [120] exp=44
+[11:45:58] lora_merged sdpa_b4 [140] exp=44
+[11:46:39] lora_merged sdpa_b4 [160] exp=47
+[11:47:21] lora_merged sdpa_b4 [180] exp=65
+[11:47:56] wrote lora_merged_sdpa_b4
+[11:48:28] ft_drift eager_b1 [100] exp=38
+[11:51:13] ft_drift eager_b1 [120] exp=48
+[11:53:59] ft_drift eager_b1 [140] exp=51
+[11:56:44] ft_drift eager_b1 [160] exp=52
+[11:59:29] ft_drift eager_b1 [180] exp=67
+[12:02:09] wrote ft_drift_eager_b1
+[12:02:17] ft_drift sdpa_b4 [100] exp=30
+[12:02:59] ft_drift sdpa_b4 [120] exp=46
+[12:03:40] ft_drift sdpa_b4 [140] exp=37
+[12:04:21] ft_drift sdpa_b4 [160] exp=50
+[12:05:02] ft_drift sdpa_b4 [180] exp=63
+[12:05:38] wrote ft_drift_sdpa_b4
+EXIT=0

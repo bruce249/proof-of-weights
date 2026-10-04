@@ -51,7 +51,7 @@ On Qwen2.5-1.5B-Instruct we find that this tolerance is the weak point: serving 
 Kernel noise and weight changes differ across depth, and a linear classifier on TOPLOC's statistics at all 28 layers attributes four known modifications with 99.3\% balanced accuracy (99.0\% from decode-time activations), against 78.0\% from the last layer alone.
 We then test it as an integrity check against three kinds of provider.
 It is not one in general: 8-bit quantisation left out of training is accepted on every test prompt, and a provider that serves quantised weights with eager attention is accepted on 92\% (8-bit) and 68\% (4-bit) of prompts at a 1\% false-rejection target.
-With the kernel enforced, none of eight such attacks, six unseen partial or combined modifications, or a detector-guided choice of layers to quantise was accepted (0 of 50 per case).
+With the kernel enforced to SDPA, no tampered model served on it was accepted: not the four known modifications at batch 1 or 4, six unseen partial or combined modifications, or a detector-guided choice of layers to quantise (0 of 50 per case).
 On a second model, SmolLM2-1.7B, eager noise is small, the last layer alone suffices, and the loophole does not appear.
 A per-layer TOPLOC commitment costs 57.8\,kB per 256 tokens.
 Neither check binds the served text to the weights that generated it, so the results bound what activation checks can establish rather than provide an integrity guarantee.

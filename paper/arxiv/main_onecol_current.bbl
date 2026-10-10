@@ -1,0 +1,118 @@
+\begin{thebibliography}{16}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Cai et~al.(2025)Cai, Shi, Zhao, and Song]{cai2025auditing}
+Will Cai, Tianneng Shi, Xuandong Zhao, and Dawn Song.
+\newblock Are you getting what you pay for? auditing model substitution in
+  {LLM} {API}s.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2025.
+\newblock arXiv:2504.04715.
+
+\bibitem[Conway et~al.(2024)Conway, So, Yu, and Wong]{conway2024opml}
+KD~Conway, Cathie So, Xiaohang Yu, and Kartin Wong.
+\newblock {opML}: Optimistic machine learning on blockchain.
+\newblock \emph{arXiv preprint arXiv:2401.17555}, 2024.
+
+\bibitem[Dettmers et~al.(2022)Dettmers, Lewis, Belkada, and
+  Zettlemoyer]{dettmers2022llmint8}
+Tim Dettmers, Mike Lewis, Younes Belkada, and Luke Zettlemoyer.
+\newblock {LLM.int8()}: 8-bit matrix multiplication for transformers at scale.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2022.
+
+\bibitem[Dettmers et~al.(2023)Dettmers, Pagnoni, Holtzman, and
+  Zettlemoyer]{dettmers2023qlora}
+Tim Dettmers, Artidoro Pagnoni, Ari Holtzman, and Luke Zettlemoyer.
+\newblock {QLoRA}: Efficient finetuning of quantized {LLM}s.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2023.
+
+\bibitem[Ding et~al.(2023)Ding, Chen, Xu, Qin, Zheng, Hu, Liu, Sun, and
+  Zhou]{ding2023ultrachat}
+Ning Ding, Yulin Chen, Bokai Xu, Yujia Qin, Zhi Zheng, Shengding Hu, Zhiyuan
+  Liu, Maosong Sun, and Bowen Zhou.
+\newblock Enhancing chat language models by scaling high-quality instructional
+  conversations.
+\newblock In \emph{Proceedings of the Conference on Empirical Methods in
+  Natural Language Processing (EMNLP)}, 2023.
+
+\bibitem[Gao et~al.(2025)Gao, Liang, and Guestrin]{gao2025model}
+Irena Gao, Percy Liang, and Carlos Guestrin.
+\newblock Model equality testing: Which model is this {API} serving?
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2025.
+\newblock arXiv:2410.20247.
+
+\bibitem[Ghodsi et~al.(2017)Ghodsi, Gu, and Garg]{ghodsi2017safetynets}
+Zahra Ghodsi, Tianyu Gu, and Siddharth Garg.
+\newblock {SafetyNets}: Verifiable execution of deep neural networks on an
+  untrusted cloud.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2017.
+
+\bibitem[He and {Thinking Machines Lab}(2025)]{he2025nondeterminism}
+Horace He and {Thinking Machines Lab}.
+\newblock Defeating nondeterminism in {LLM} inference.
+\newblock Thinking Machines Lab: Connectionism, 2025.
+
+\bibitem[Hu et~al.(2022)Hu, Shen, Wallis, Allen-Zhu, Li, Wang, Wang, and
+  Chen]{hu2022lora}
+Edward~J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean
+  Wang, Lu~Wang, and Weizhu Chen.
+\newblock {LoRA}: Low-rank adaptation of large language models.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2022.
+
+\bibitem[Ong et~al.(2025)]{ong2025toploc}
+Jack~Min Ong et~al.
+\newblock {TOPLOC}: A locality sensitive hashing scheme for trustless
+  verifiable inference.
+\newblock In \emph{Proceedings of the 42nd International Conference on Machine
+  Learning (ICML)}, volume 267 of \emph{PMLR}, 2025.
+\newblock arXiv:2501.16007.
+
+\bibitem[{Qwen Team}(2024)]{qwen2025qwen25}
+{Qwen Team}.
+\newblock Qwen2.5 technical report.
+\newblock \emph{arXiv preprint arXiv:2412.15115}, 2024.
+
+\bibitem[Sun et~al.(2024)Sun, Li, and Zhang]{sun2024zkllm}
+Haochen Sun, Jason Li, and Hongyang Zhang.
+\newblock {zkLLM}: Zero knowledge proofs for large language models.
+\newblock In \emph{Proceedings of the ACM SIGSAC Conference on Computer and
+  Communications Security (CCS)}, 2024.
+\newblock arXiv:2404.16109.
+
+\bibitem[Sun et~al.(2025)Sun, Li, Zhang, Jin, and Zhang]{sun2025svip}
+Yifan Sun, Yuhang Li, Yue Zhang, Yuchen Jin, and Huan Zhang.
+\newblock {SVIP}: Towards verifiable inference of open-source large language
+  models.
+\newblock In \emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}, 2025.
+\newblock arXiv:2410.22307.
+
+\bibitem[Taori et~al.(2023)Taori, Gulrajani, Zhang, Dubois, Li, Guestrin,
+  Liang, and Hashimoto]{taori2023alpaca}
+Rohan Taori, Ishaan Gulrajani, Tianyi Zhang, Yann Dubois, Xuechen Li, Carlos
+  Guestrin, Percy Liang, and Tatsunori~B. Hashimoto.
+\newblock Stanford {Alpaca}: An instruction-following {LLaMA} model.
+\newblock \url{https://github.com/tatsu-lab/stanford_alpaca}, 2023.
+
+\bibitem[Teutsch and Reitwie{\ss}ner(2019)]{teutsch2019truebit}
+Jason Teutsch and Christian Reitwie{\ss}ner.
+\newblock A scalable verification solution for blockchains.
+\newblock \emph{arXiv preprint arXiv:1908.04756}, 2019.
+
+\bibitem[Tram{\`e}r and Boneh(2019)]{tramer2019slalom}
+Florian Tram{\`e}r and Dan Boneh.
+\newblock Slalom: Fast, verifiable and private execution of neural networks in
+  trusted hardware.
+\newblock In \emph{International Conference on Learning Representations
+  (ICLR)}, 2019.
+
+\end{thebibliography}

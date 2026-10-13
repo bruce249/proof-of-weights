@@ -32,6 +32,7 @@
     .card p { color: #d9d3c7; }
     .tx { font-family: Consolas, monospace; font-size: 13px; word-break: break-all; }
     .err { color: #ff5a36; }
+    .tx a { color: #d7e27a; }
   </style>
 </head>
 <body>
@@ -76,10 +77,15 @@
         ["Proof " + data.proof_id, data.challenged ? "Challenged and slashed" : "Submitted"],
         ["Diagnosed class", data.tamper_name],
         ["Why it failed", "Exponent mismatch " + data.exp_mismatches_max + "  ·  limit " + data.threshold_exp.toFixed(1)],
-        ["Slash transaction", data.slash_tx],
+        ["Slash transaction", data.explorer
+          ? `<a href="${data.explorer}/tx/${data.slash_tx}" target="_blank" rel="noopener">${data.slash_tx}</a>`
+          : data.slash_tx],
+        ["Contract on " + data.chain + " (chain " + data.chain_id + ")", data.explorer
+          ? `<a href="${data.explorer}/address/${data.contract}" target="_blank" rel="noopener">${data.contract}</a>`
+          : data.contract],
       ];
       document.getElementById("cards").innerHTML = rows.map(([title, body], i) =>
-        `<article class="card"><strong>${title}</strong><p class="${i === 3 ? "tx" : ""}">${body}</p></article>`
+        `<article class="card"><strong>${title}</strong><p class="${i >= 3 ? "tx" : ""}">${body}</p></article>`
       ).join("");
     }
     async function poll() {
@@ -90,7 +96,7 @@
         render(data);
       } catch (err) {
         document.getElementById("verdict").textContent = "OFFLINE";
-        document.getElementById("lead").textContent = "The local chain is not answering. " + err.message;
+        document.getElementById("lead").textContent = "The chain is not answering. " + err.message;
       }
     }
     poll();

@@ -1,15 +1,23 @@
-"""Serve the slash dashboard and poll the local Anvil contract."""
+"""Serve the slash dashboard and poll the deployed contract.
+
+POW_NETWORK=monad reads contracts/deployment.monad.json; the default is local Anvil.
+"""
 
 from __future__ import annotations
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
-RPC = "http://127.0.0.1:8545"
-CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+NETWORK = os.environ.get("POW_NETWORK", "anvil")
+_DEPLOY = json.loads((ROOT / "contracts" / ("deployment.monad.json" if NETWORK == "monad" else "deployment.json")).read_text(encoding="utf-8"))
+_LOG = ROOT / "results" / ("live_slash_monad.json" if NETWORK == "monad" else "live_slash.json")
+RPC = _DEPLOY["rpc"]
+CONTRACT = _DEPLOY["address"]
+EXPLORER = _DEPLOY.get("explorer")
 NAMES = {0: "clean", 1: "quant_8bit", 2: "quant_4bit", 3: "lora_merged", 4: "ft_drift", 255: "TAMPERED"}
 
 
@@ -42,19 +50,22 @@ def _uint8_array(blob: bytes) -> list[int]:
 
 
 def state() -> dict:
-    stake = _word(_call("0xd3ddf59c", 1), 0)
+    log = json.loads(_LOG.read_text(encoding="utf-8"))
+    pid = int(log["provider_id"])
+    stake = _word(_call("0xd3ddf59c", pid), 0)
     required = _word(_call("0x19cb355d"), 0)
-    history = _uint8_array(_call("0x33ffff1d", 1))
-    proof = _call("0x9ddaf5aa", 1)
+    history = _uint8_array(_call("0x33ffff1d", pid))
+    proof = _call("0x9ddaf5aa", int(log["proof_id"]))
     slashed = bool(_word(proof, 7))
     challenged = bool(_word(proof, 6))
-    log = json.loads((ROOT / "results" / "live_slash.json").read_text(encoding="utf-8"))
     klass = history[-1] if history else None
     return {
-        "chain": "anvil",
+        "chain": _DEPLOY["network"],
+        "chain_id": _DEPLOY["chainId"],
         "rpc": RPC,
+        "explorer": EXPLORER,
         "contract": CONTRACT,
-        "provider_id": 1,
+        "provider_id": pid,
         "proof_id": int(log["proof_id"]),
         "required_stake": str(required),
         "stake": str(stake),
@@ -97,8 +108,10 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main() -> None:
-    server = ThreadingHTTPServer(("127.0.0.1", 8765), Handler)
-    print("dashboard http://127.0.0.1:8765", flush=True)
+    host = os.environ.get("HOST", "127.0.0.1")
+    port = int(os.environ.get("PORT", "8765"))
+    server = ThreadingHTTPServer((host, port), Handler)
+    print(f"dashboard http://{host}:{port}  network {NETWORK}", flush=True)
     server.serve_forever()
 
 
